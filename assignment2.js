@@ -32,8 +32,8 @@ class Stilt extends Shape {
       // Arrange the vertices into a square shape in texture space too:
       this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
           14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
-  }
-}
+      }
+    }
 
 class Base_Scene extends Scene {
   /**
@@ -45,6 +45,9 @@ class Base_Scene extends Scene {
     super();
     this.outline = false;
     this.hover = this.swarm = false;
+    this.left_lift = this.right_lift = false;
+    this.left_rotate_forward = this.right_rotate_forward = false;
+    this.left_rotate_backward = this.right_rotate_backward = false;
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new Stilt(),
@@ -88,6 +91,18 @@ class Base_Scene extends Scene {
 }
 
 export class Assignment2 extends Base_Scene {
+  constructor() {
+    super();
+    this.left_stilt_time = new Date().getTime() / 1000;
+    this.right_stilt_time = new Date().getTime() / 1000;
+    this.left_rotate_time = new Date().getTime() / 1000;
+
+    this.left_stilt_model = Mat4.identity();
+    this.right_stilt_model = Mat4.translation(-10, 0, 0).times(Mat4.identity());
+
+    this.stilt_max_height = 5;
+    this.keyboard_color = "#6E6460";
+  }
   /**
    * This Scene object can be added to any display canvas.
    * We isolate that code so it can be experimented with on its own.
@@ -108,15 +123,32 @@ export class Assignment2 extends Base_Scene {
 
   make_control_panel() {
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-    this.key_triggered_button("Change Colors", ["c"], this.set_colors);
-    // Add a button for controlling the scene.
-    this.key_triggered_button("Outline", ["o"], () => {
-      // TODO:  Requirement 5b:  Set a flag here that will toggle your outline on and off
-      this.outline ^= 1;
+    this.key_triggered_button("Lift Left", ["v"], () => {
+      this.left_lift = true;
+      this.left_stilt_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.left_lift = false;
+      this.left_stilt_time = new Date().getTime() / 1000;
     });
-    this.key_triggered_button("Sit still", ["m"], () => {
-      // TODO:  Requirement 3d:  Set a flag here that will toggle your swaying motion on and off.
-      this.swarm ^= 1;
+    this.key_triggered_button("Lift Right", ["n"], () => {
+      this.right_lift = true;
+      this.right_stilt_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.right_lift = false;
+      this.right_stilt_time = new Date().getTime() / 1000;
+    });
+    this.key_triggered_button("Rotate Forward", ["g"], () => {
+      this.left_rotate_forward = true;
+      this.right_rotate_forward = true;
+      this.left_rotate_backward = true;
+      this.right_rotate_backward = true;
+
+      this.left_rotate_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.left_rotate_forward = false;
+      this.right_rotate_forward = false;
+      this.left_rotate_backward = false;
+      this.right_rotate_backward = false;
     });
   }
 
@@ -141,20 +173,55 @@ export class Assignment2 extends Base_Scene {
   display(context, program_state) {
     super.display(context, program_state);
     const blue = hex_color("#1a9ffa");
-    let model_transform = Mat4.identity();
+    let t = new Date().getTime() / 1000;
+
+    let max_rotation_angle = (0.25 * Math.PI);
+    let periodic_motion_angle = max_rotation_angle / 5;
+
+    if (this.left_lift) {
+      if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
+        this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
+      }
+    } else {
+      if (this.left_stilt_model[1][3] - (new Date().getTime() / 1000 - this.left_stilt_time) >= 0) {
+        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
+      } else {
+        this.left_stilt_model = Mat4.identity();
+      }
+    }
+
+    if (this.left_rotate_forward && this.left_lift) {
+      if (this.left_stilt_model[2][1] < 0.7) {
+        this.left_stilt_model = Mat4.translation(0, 8, 0)
+          .times(Mat4.rotation(periodic_motion_angle / 10, 1, 0, 0))
+          .times(Mat4.translation(0, -8, 0))
+          .times(this.left_stilt_model);
+      }
+    }
 
     this.shapes.stilt.draw(
       context,
       program_state,
-      model_transform,
+      this.left_stilt_model,
       this.materials.plastic.override({ color: blue })
     );
 
-    model_transform = Mat4.translation(-10, 0, 0).times(model_transform);
+    if (this.right_lift) {
+      if (this.right_stilt_model[1][3] + (new Date().getTime() / 1000 - this.right_stilt_time) < this.stilt_max_height) {
+        this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
+      }
+    } else {
+      if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
+        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
+      } else {
+        this.right_stilt_model = Mat4.translation(-10, 0, 0).times(Mat4.identity());
+      }
+    }
+
     this.shapes.stilt.draw(
       context,
       program_state,
-      model_transform,
+      this.right_stilt_model,
       this.materials.plastic.override({ color: blue })
     );
   }

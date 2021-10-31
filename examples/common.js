@@ -493,10 +493,10 @@ const Basic_Shader = defs.Basic_Shader =
             // ********* VERTEX SHADER *********
             return this.shared_glsl_code() + `
                 attribute vec4 color;
-                attribute vec3 position;                            
+                attribute vec3 position;
                 // Position is expressed in object coordinates.
                 uniform mat4 projection_camera_model_transform;
-        
+
                 void main(){
                     // Compute the vertex's final resting place (in NDCS), and use the hard-coded color of the vertex:
                     gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
@@ -537,15 +537,15 @@ const Funny_Shader = defs.Funny_Shader =
         vertex_glsl_code() {
             // ********* VERTEX SHADER *********
             return this.shared_glsl_code() + `
-                attribute vec3 position;                            
+                attribute vec3 position;
                 // Position is expressed in object coordinates.
                 attribute vec2 texture_coord;
                 uniform mat4 projection_camera_model_transform;
-        
-                void main(){ 
-                    gl_Position = projection_camera_model_transform * vec4( position, 1.0 );   
+
+                void main(){
+                    gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
                     // The vertex's final resting place (in NDCS).
-                    f_tex_coord = texture_coord;                                       
+                    f_tex_coord = texture_coord;
                     // Directly use original texture coords and interpolate between.
                 }`;
         }
@@ -554,11 +554,11 @@ const Funny_Shader = defs.Funny_Shader =
             // ********* FRAGMENT SHADER *********
             return this.shared_glsl_code() + `
                 uniform float animation_time;
-                void main(){ 
-                    float a = animation_time, u = f_tex_coord.x, v = f_tex_coord.y;   
-                    // Use an arbitrary math function to color in all pixels as a complex                                                                  
-                    gl_FragColor = vec4(                                    
-                        // function of the UV texture coordintaes of the pixel and of time.  
+                void main(){
+                    float a = animation_time, u = f_tex_coord.x, v = f_tex_coord.y;
+                    // Use an arbitrary math function to color in all pixels as a complex
+                    gl_FragColor = vec4(
+                        // function of the UV texture coordintaes of the pixel and of time.
                         2.0 * u * sin(17.0 * u ) + 3.0 * v * sin(11.0 * v ) + 1.0 * sin(13.0 * a),
                         3.0 * u * sin(18.0 * u ) + 4.0 * v * sin(12.0 * v ) + 2.0 * sin(14.0 * a),
                         4.0 * u * sin(19.0 * u ) + 5.0 * v * sin(13.0 * v ) + 3.0 * sin(15.0 * a),
@@ -591,27 +591,27 @@ const Phong_Shader = defs.Phong_Shader =
                 uniform float light_attenuation_factors[N_LIGHTS];
                 uniform vec4 shape_color;
                 uniform vec3 squared_scale, camera_center;
-        
+
                 // Specifier "varying" means a variable's final value will be passed from the vertex shader
                 // on to the next phase (fragment shader), then interpolated per-fragment, weighted by the
                 // pixel fragment's proximity to each of the 3 vertices (barycentric interpolation).
                 varying vec3 N, vertex_worldspace;
-                // ***** PHONG SHADING HAPPENS HERE: *****                                       
-                vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace ){                                        
+                // ***** PHONG SHADING HAPPENS HERE: *****
+                vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace ){
                     // phong_model_lights():  Add up the lights' contributions.
                     vec3 E = normalize( camera_center - vertex_worldspace );
                     vec3 result = vec3( 0.0 );
                     for(int i = 0; i < N_LIGHTS; i++){
-                        // Lights store homogeneous coords - either a position or vector.  If w is 0, the 
-                        // light will appear directional (uniform direction from all points), and we 
+                        // Lights store homogeneous coords - either a position or vector.  If w is 0, the
+                        // light will appear directional (uniform direction from all points), and we
                         // simply obtain a vector towards the light by directly using the stored value.
-                        // Otherwise if w is 1 it will appear as a point light -- compute the vector to 
-                        // the point light's location from the current surface point.  In either case, 
-                        // fade (attenuate) the light as the vector needed to reach it gets longer.  
-                        vec3 surface_to_light_vector = light_positions_or_vectors[i].xyz - 
-                                                       light_positions_or_vectors[i].w * vertex_worldspace;                                             
+                        // Otherwise if w is 1 it will appear as a point light -- compute the vector to
+                        // the point light's location from the current surface point.  In either case,
+                        // fade (attenuate) the light as the vector needed to reach it gets longer.
+                        vec3 surface_to_light_vector = light_positions_or_vectors[i].xyz -
+                                                       light_positions_or_vectors[i].w * vertex_worldspace;
                         float distance_to_light = length( surface_to_light_vector );
-        
+
                         vec3 L = normalize( surface_to_light_vector );
                         vec3 H = normalize( L + E );
                         // Compute the diffuse and specular components from the Phong
@@ -619,7 +619,7 @@ const Phong_Shader = defs.Phong_Shader =
                         float diffuse  =      max( dot( N, L ), 0.0 );
                         float specular = pow( max( dot( N, H ), 0.0 ), smoothness );
                         float attenuation = 1.0 / (1.0 + light_attenuation_factors[i] * distance_to_light * distance_to_light );
-                        
+
                         vec3 light_contribution = shape_color.xyz * light_colors[i].xyz * diffusivity * diffuse
                                                                   + light_colors[i].xyz * specularity * specular;
                         result += attenuation * light_contribution;
@@ -631,13 +631,13 @@ const Phong_Shader = defs.Phong_Shader =
         vertex_glsl_code() {
             // ********* VERTEX SHADER *********
             return this.shared_glsl_code() + `
-                attribute vec3 position, normal;                            
+                attribute vec3 position, normal;
                 // Position is expressed in object coordinates.
-                
+
                 uniform mat4 model_transform;
                 uniform mat4 projection_camera_model_transform;
-        
-                void main(){                                                                   
+
+                void main(){
                     // The vertex's final resting place (in NDCS):
                     gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
                     // The final normal vector in screen space.
@@ -651,7 +651,7 @@ const Phong_Shader = defs.Phong_Shader =
             // A fragment is a pixel that's overlapped by the current triangle.
             // Fragments affect the final image or get discarded due to depth.
             return this.shared_glsl_code() + `
-                void main(){                                                           
+                void main(){
                     // Compute an initial (ambient) color:
                     gl_FragColor = vec4( shape_color.xyz * ambient, shape_color.w );
                     // Compute the final color with contributions from lights:
@@ -728,14 +728,14 @@ const Textured_Phong = defs.Textured_Phong =
             // ********* VERTEX SHADER *********
             return this.shared_glsl_code() + `
                 varying vec2 f_tex_coord;
-                attribute vec3 position, normal;                            
+                attribute vec3 position, normal;
                 // Position is expressed in object coordinates.
                 attribute vec2 texture_coord;
-                
+
                 uniform mat4 model_transform;
                 uniform mat4 projection_camera_model_transform;
-        
-                void main(){                                                                   
+
+                void main(){
                     // The vertex's final resting place (in NDCS):
                     gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
                     // The final normal vector in screen space.
@@ -753,13 +753,13 @@ const Textured_Phong = defs.Textured_Phong =
             return this.shared_glsl_code() + `
                 varying vec2 f_tex_coord;
                 uniform sampler2D texture;
-        
+
                 void main(){
                     // Sample the texture image in the correct place:
                     vec4 tex_color = texture2D( texture, f_tex_coord );
                     if( tex_color.w < .01 ) discard;
                                                                              // Compute an initial (ambient) color:
-                    gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                    gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w );
                                                                              // Compute the final color with contributions from lights:
                     gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
                   } `;
@@ -788,7 +788,7 @@ const Fake_Bump_Map = defs.Fake_Bump_Map =
             return this.shared_glsl_code() + `
                 varying vec2 f_tex_coord;
                 uniform sampler2D texture;
-        
+
                 void main(){
                     // Sample the texture image in the correct place:
                     vec4 tex_color = texture2D( texture, f_tex_coord );
@@ -796,7 +796,7 @@ const Fake_Bump_Map = defs.Fake_Bump_Map =
                     // Slightly disturb normals based on sampling the same image that was used for texturing:
                     vec3 bumped_N  = N + tex_color.rgb - .5*vec3(1,1,1);
                     // Compute an initial (ambient) color:
-                    gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                    gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w );
                     // Compute the final color with contributions from lights:
                     gl_FragColor.xyz += phong_model_lights( normalize( bumped_N ), vertex_worldspace );
                   } `;
