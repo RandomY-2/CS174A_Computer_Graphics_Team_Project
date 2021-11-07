@@ -5,7 +5,7 @@ const {
   Vector3,
   vec,
   vec3,
-  vec4,
+  vec4, 
   color,
   hex_color,
   Matrix,
@@ -51,6 +51,7 @@ class Base_Scene extends Scene {
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new Stilt(),
+      sphere: new defs.Subdivision_Sphere(4), 
     };
 
     // *** Materials
@@ -254,5 +255,13 @@ export class Assignment2 extends Base_Scene {
       this.right_stilt_model,
       this.materials.plastic.override({ color: blue })
     );
+
+    // character
+    this.shapes.sphere.draw(
+      context, 
+      program_state,
+      Mat4.identity(),
+      this.materials.plastic.override({ color: blue })
+    )
   }
 }
