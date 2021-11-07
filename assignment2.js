@@ -247,6 +247,7 @@ export class Assignment2 extends Base_Scene {
   display(context, program_state) {
     super.display(context, program_state);
     const blue = hex_color("#1a9ffa");
+    const salmon = hex_color("FFA07A")
     let t = new Date().getTime() / 1000;
 
     let max_rotation_angle = (0.25 * Math.PI);
@@ -338,7 +339,7 @@ export class Assignment2 extends Base_Scene {
       context, 
       program_state,
       character_head_transform,
-      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      this.materials.plastic.override({ color: salmon })
       )
     
     // character body
@@ -347,7 +348,7 @@ export class Assignment2 extends Base_Scene {
       context, 
       program_state,
       character_body_transform,
-      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      this.materials.plastic.override({ color: salmon })
       )
   }
 }
