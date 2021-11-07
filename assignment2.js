@@ -5,7 +5,7 @@ const {
   Vector3,
   vec,
   vec3,
-  vec4,
+  vec4, 
   color,
   hex_color,
   Matrix,
@@ -213,6 +213,33 @@ export class Assignment2 extends Base_Scene {
     return model_transform;
   }
 
+  draw_character_head(
+    context,
+    program_state,
+  ){
+    const scale_factor = 3;
+    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+      scale_factor,
+      scale_factor,
+      scale_factor
+    ).times(Mat4.identity()));
+
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      character_transform,
+      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+    );
+    return character_transform;
+  }
+
+  draw_character_body(
+    context,
+    program_state,
+  ){
+    
+  }
+
   display(context, program_state) {
     super.display(context, program_state);
     const blue = hex_color("#1a9ffa");
@@ -294,5 +321,9 @@ export class Assignment2 extends Base_Scene {
       this.right_stilt_model,
       this.materials.plastic.override({ color: blue })
     );
+
+    // character
+    this.draw_character_head(context, program_state)
+    this.draw_character_body(context, program_state)
   }
 }
