@@ -352,7 +352,6 @@ export class Assignment2 extends Base_Scene {
       )
 
     // character torso
-    // upper left hand
     const scale_factor_torse = 2;
     const character_upper_left = Mat4.translation(-18, 10, 0).times(Mat4.scale(
       scale_factor_torse,
