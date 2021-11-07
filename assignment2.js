@@ -265,21 +265,16 @@ export class Assignment2 extends Base_Scene {
     let stilt_rotation_angle = max_rotation_angle / 5;
     let lean_angle = max_rotation_angle / 100;
 
-    if (this.lean_forward) {
-      this.lean = Mat4.rotation(lean_angle, 1, 0, 0).times(this.lean);
-    } else if (this.lean_backward) {
-      this.lean = Mat4.rotation(0 - lean_angle, 1, 0, 0).times(this.lean);
-    } 
 
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
-        this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.lean).times(this.left_stilt_model);
+        this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
       }
     } else {
       if (this.left_stilt_model[1][3] - (new Date().getTime() / 1000 - this.left_stilt_time) >= 0) {
-        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.lean).times(this.left_stilt_model);
+        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
       } else {
-        this.left_stilt_model = this.lean.times(Mat4.identity());
+        this.left_stilt_model = Mat4.identity();
       }
     }
 
@@ -288,7 +283,7 @@ export class Assignment2 extends Base_Scene {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.lean).times(this.left_stilt_model);
+          .times(this.left_stilt_model);
       }
     }
 
@@ -297,66 +292,99 @@ export class Assignment2 extends Base_Scene {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.lean).times(this.left_stilt_model);
+          .times(this.left_stilt_model);
       }
     }
 
-    this.shapes.stilt.draw(
-      context,
-      program_state,
-      this.left_stilt_model,
-      this.materials.plastic.override({ color: blue })
-    );
-
+    
     if (this.right_lift) {
       if (this.right_stilt_model[1][3] + (new Date().getTime() / 1000 - this.right_stilt_time) < this.stilt_max_height) {
-        this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.lean).times(this.right_stilt_model);
+        this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
       }
     } else {
       if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
-        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.lean).times(this.right_stilt_model);
+        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
       } else {
-        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(this.lean).times(Mat4.identity());
+        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
       }
     }
-
+    
     if (this.right_rotate_forward && this.right_lift) {
       if (this.right_stilt_model[2][1] < 0.7) {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.lean).times(this.right_stilt_model);
+          .times(this.right_stilt_model);
+        }
       }
-    }
-
-    if (this.right_rotate_backward && this.right_lift) {
-      if (this.right_stilt_model[2][1] > -0.7) {
-        this.right_stilt_model = Mat4.translation(0, 8, 0)
+      
+      if (this.right_rotate_backward && this.right_lift) {
+        if (this.right_stilt_model[2][1] > -0.7) {
+          this.right_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.lean).times(this.right_stilt_model);
+          .times(this.right_stilt_model);
+        }
       }
-    }
 
-    this.shapes.stilt.draw(
-      context,
+      // character
+      const scale_factor = 3;
+      const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+        scale_factor,
+        scale_factor,
+        scale_factor
+      ).times(Mat4.identity()));
+      
+
+
+      // lean
+      
+      let left_leg_z = this.left_stilt_model[2][3];
+      let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
+      let right_leg_z = this.right_stilt_model[2][3];      
+      let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
+      let left_leg_y = this.left_stilt_model[2][2];
+      let left_foot_y = left_leg_y - 20 * this.left_stilt_model[1][1];
+      let right_leg_y = this.right_stilt_model[2][2];
+      let right_foot_y = right_leg_y - 20 * this.right_stilt_model[1][1];
+      
+      let front_z = (left_foot_z > right_foot_z) ? left_foot_z : right_foot_z;
+      let front_y = (left_foot_z > right_foot_z) ? left_foot_y : right_foot_y;
+
+      if (this.lean_forward) {
+        this.lean = Mat4.translation(0, left_foot_y, left_foot_z)
+                        .times(Mat4.rotation(lean_angle, 1, 0, 0))
+                        .times(Mat4.translation(0, 0 - left_foot_y, 0 - left_foot_z))
+                        .times(this.lean);
+      } else if (this.lean_backward) {
+        this.lean = Mat4.translation(0, left_foot_y, left_foot_z)
+                        .times(Mat4.rotation(0 - lean_angle, 1, 0, 0))
+                        .times(Mat4.translation(0, 0 - left_foot_y, 0 - left_foot_z))
+                        .times(this.lean);
+      } 
+
+      // start drawing
+
+      this.shapes.stilt.draw(
+        context,
+        program_state,
+        this.lean.times(this.left_stilt_model),
+        this.materials.plastic.override({ color: blue })
+      );
+
+      this.shapes.stilt.draw(
+        context,
       program_state,
-      this.right_stilt_model,
+      this.lean.times(this.right_stilt_model),
       this.materials.plastic.override({ color: blue })
     );
 
 
     // character
-    const scale_factor = 3;
-    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
-      scale_factor,
-      scale_factor,
-      scale_factor
-    ).times(Mat4.identity()));
     this.draw_character_head(
       context, 
       program_state,
-      character_transform,
+      this.lean.times(character_transform),
       this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
       )
     this.draw_character_body(context, program_state)
