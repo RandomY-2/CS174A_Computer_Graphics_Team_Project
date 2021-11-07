@@ -83,13 +83,13 @@ class Base_Scene extends Scene {
     const scale_factor = 30;
     const sun_color = color(1, 1, 1, 1);
 
-    const sun_model_transform = Mat4.translation(-50, 50, 50).times(Mat4.scale(
+    const sun_model_transform = Mat4.translation(-30, 50, 50).times(Mat4.scale(
       scale_factor,
       scale_factor,
       scale_factor
     ).times(Mat4.identity()));
 
-    const light_position = vec4(-50, 50, 50, 1);
+    const light_position = vec4(-30, 50, 50, 1);
     program_state.lights = [
       new Light(light_position, sun_color, 1000 ** scale_factor),
     ];
