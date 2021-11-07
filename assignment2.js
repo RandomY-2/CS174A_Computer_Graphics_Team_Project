@@ -267,15 +267,13 @@ export class Assignment2 extends Base_Scene {
 
     let max_rotation_angle = (0.25 * Math.PI);
     let stilt_rotation_angle = max_rotation_angle / 5;
-    let lean_angle = max_rotation_angle / 10;
+    let lean_angle = max_rotation_angle / 100;
 
     if (this.lean_forward) {
-      this.lean = Mat4.rotation(Math.PI/100, 1, 0, 0);
+      this.lean = Mat4.rotation(lean_angle, 1, 0, 0).times(this.lean);
     } else if (this.lean_backward) {
-      this.lean = Mat4.rotation(lean_angle, 1, 0, 0);
-    } else {
-      this.lean = Mat4.identity();
-    }
+      this.lean = Mat4.rotation(0 - lean_angle, 1, 0, 0).times(this.lean);
+    } 
 
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
