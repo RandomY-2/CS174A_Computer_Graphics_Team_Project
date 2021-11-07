@@ -81,18 +81,18 @@ class Base_Scene extends Scene {
   }
 
   draw_sun(context, program_state) {
-    const scale_factor = 30;
+    const scale_factor = 5;
     const sun_color = color(1, 1, 1, 1);
 
-    const sun_model_transform = Mat4.translation(-30, 50, 50).times(Mat4.scale(
+    const sun_model_transform = Mat4.translation(-10, 30, 30).times(Mat4.scale(
       scale_factor,
       scale_factor,
       scale_factor
     ).times(Mat4.identity()));
 
-    const light_position = vec4(-30, 50, 50, 1);
+    const light_position = vec4(-10, 50, 50, 1);
     program_state.lights = [
-      new Light(light_position, sun_color, 1000 ** scale_factor),
+      new Light(light_position, sun_color, 1000 ** 30),
     ];
 
     this.shapes.sphere_4.draw(
@@ -236,28 +236,24 @@ export class Assignment2 extends Base_Scene {
   draw_character_head(
     context,
     program_state,
+    model_transform,
+    color
   ){
-    const scale_factor = 3;
-    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
-      scale_factor,
-      scale_factor,
-      scale_factor
-    ).times(Mat4.identity()));
 
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      character_transform,
-      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      model_transform,
+      color
     );
-    return character_transform;
+    return model_transform;
   }
 
   draw_character_body(
     context,
     program_state,
   ){
-    
+
   }
 
   display(context, program_state) {
@@ -349,8 +345,20 @@ export class Assignment2 extends Base_Scene {
       this.materials.plastic.override({ color: blue })
     );
 
+
     // character
-    this.draw_character_head(context, program_state)
+    const scale_factor = 3;
+    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+      scale_factor,
+      scale_factor,
+      scale_factor
+    ).times(Mat4.identity()));
+    this.draw_character_head(
+      context, 
+      program_state,
+      character_transform,
+      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      )
     this.draw_character_body(context, program_state)
   }
 }
