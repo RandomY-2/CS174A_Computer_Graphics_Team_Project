@@ -5,7 +5,7 @@ const {
   Vector3,
   vec,
   vec3,
-  vec4, 
+  vec4,
   color,
   hex_color,
   Matrix,
@@ -35,6 +35,7 @@ class Stilt extends Shape {
           14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
       }
     }
+
 
 class Base_Scene extends Scene {
   /**
@@ -84,15 +85,15 @@ class Base_Scene extends Scene {
     const scale_factor = 5;
     const sun_color = color(1, 1, 1, 1);
 
-    const sun_model_transform = Mat4.translation(-10, 30, 30).times(Mat4.scale(
+    const sun_model_transform = Mat4.translation(-50, 30, 30).times(Mat4.scale(
       scale_factor,
       scale_factor,
       scale_factor
     ).times(Mat4.identity()));
 
-    const light_position = vec4(-10, 50, 50, 1);
+    const light_position = vec4(-50, 50, 50, 1);
     program_state.lights = [
-      new Light(light_position, sun_color, 1000 ** 30),
+      new Light(light_position, sun_color, 1000 ** 50),
     ];
 
     this.shapes.sphere_4.draw(
@@ -239,7 +240,6 @@ export class Assignment2 extends Base_Scene {
     model_transform,
     color
   ){
-
     this.shapes.sphere_4.draw(
       context,
       program_state,
@@ -252,13 +252,22 @@ export class Assignment2 extends Base_Scene {
   draw_character_body(
     context,
     program_state,
+    model_transform,
+    color,
   ){
-
+    this.shapes.stilt.draw(
+      context,
+      program_state,
+      model_transform,
+      color,
+    )
+    return model_transform;
   }
 
   display(context, program_state) {
     super.display(context, program_state);
     const blue = hex_color("#1a9ffa");
+    const salmon = hex_color("FFA07A")
     let t = new Date().getTime() / 1000;
 
     let max_rotation_angle = (0.25 * Math.PI);
@@ -336,6 +345,39 @@ export class Assignment2 extends Base_Scene {
       ).times(Mat4.identity()));
       
 
+      // character head
+      const scale_factor = 4;
+      const character_head_transform = Mat4.translation(-10, 20, 0).times(Mat4.scale(
+        scale_factor,
+        scale_factor,
+        scale_factor
+      ).times(Mat4.identity()));
+
+
+      // character torso
+      // upper left hand
+      const scale_factor_torse = 2;
+      const character_upper_left = Mat4.translation(-18, 10, 0).times(Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity()));
+      const character_upper_right = Mat4.translation(-2, 10, 0).times(Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity()));
+      const character_lower_left = Mat4.translation(-18, -5, 0).times(Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity()));
+      const character_lower_right = Mat4.translation(-2, -5, 0).times(Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity()));    
+
 
       // lean
       
@@ -383,13 +425,46 @@ export class Assignment2 extends Base_Scene {
     );
 
 
-    // character
     this.draw_character_head(
-      context, 
+      context,
       program_state,
-      this.lean.times(character_transform),
-      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      this.lean.times(character_head_transform),
+      this.materials.plastic.override({ color: salmon })
       )
-    this.draw_character_body(context, program_state)
+
+    // character body
+    const character_body_transform = Mat4.translation(-10,5,0).times(Mat4.scale(5,0.3,5)).times(Mat4.identity());
+    this.draw_character_body(
+      context,
+      program_state,
+      this.lean.times(character_body_transform),
+      this.materials.plastic.override({ color: salmon })
+    )
+
+    
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      this.lean.times(character_upper_left),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      this.lean.times(character_upper_right),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      this.lean.times(character_lower_left),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      this.lean.times(character_lower_right),
+      this.materials.plastic.override({ color: salmon })
+    );    
   }
 }
