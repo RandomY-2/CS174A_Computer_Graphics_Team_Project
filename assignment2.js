@@ -5,7 +5,7 @@ const {
   Vector3,
   vec,
   vec3,
-  vec4, 
+  vec4,
   color,
   hex_color,
   Matrix,
@@ -84,15 +84,15 @@ class Base_Scene extends Scene {
     const scale_factor = 5;
     const sun_color = color(1, 1, 1, 1);
 
-    const sun_model_transform = Mat4.translation(-10, 30, 30).times(Mat4.scale(
+    const sun_model_transform = Mat4.translation(-50, 30, 30).times(Mat4.scale(
       scale_factor,
       scale_factor,
       scale_factor
     ).times(Mat4.identity()));
 
-    const light_position = vec4(-10, 50, 50, 1);
+    const light_position = vec4(-50, 50, 50, 1);
     program_state.lights = [
-      new Light(light_position, sun_color, 1000 ** 30),
+      new Light(light_position, sun_color, 1000 ** 50),
     ];
 
     this.shapes.sphere_4.draw(
@@ -239,7 +239,7 @@ export class Assignment2 extends Base_Scene {
       context,
       program_state,
       model_transform,
-      color,      
+      color,
     )
     return model_transform;
   }
@@ -336,16 +336,16 @@ export class Assignment2 extends Base_Scene {
       scale_factor
     ).times(Mat4.identity()));
     this.draw_character_head(
-      context, 
+      context,
       program_state,
       character_head_transform,
       this.materials.plastic.override({ color: salmon })
       )
-    
+
     // character body
     const character_body_transform = Mat4.translation(-10,5,0).times(Mat4.scale(5,0.3,5)).times(Mat4.identity());
     this.draw_character_body(
-      context, 
+      context,
       program_state,
       character_body_transform,
       this.materials.plastic.override({ color: salmon })
