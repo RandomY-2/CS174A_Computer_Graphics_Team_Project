@@ -350,5 +350,54 @@ export class Assignment2 extends Base_Scene {
       character_body_transform,
       this.materials.plastic.override({ color: salmon })
       )
+
+    // character torso
+    // upper left hand
+    const scale_factor_torse = 2;
+    const character_upper_left = Mat4.translation(-18, 10, 0).times(Mat4.scale(
+      scale_factor_torse,
+      scale_factor_torse,
+      scale_factor_torse
+    ).times(Mat4.identity()));
+    const character_upper_right = Mat4.translation(-2, 10, 0).times(Mat4.scale(
+      scale_factor_torse,
+      scale_factor_torse,
+      scale_factor_torse
+    ).times(Mat4.identity()));
+    const character_lower_left = Mat4.translation(-18, -5, 0).times(Mat4.scale(
+      scale_factor_torse,
+      scale_factor_torse,
+      scale_factor_torse
+    ).times(Mat4.identity()));
+    const character_lower_right = Mat4.translation(-2, -5, 0).times(Mat4.scale(
+      scale_factor_torse,
+      scale_factor_torse,
+      scale_factor_torse
+    ).times(Mat4.identity()));    
+
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      character_upper_left,
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      character_upper_right,
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      character_lower_left,
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      character_lower_right,
+      this.materials.plastic.override({ color: salmon })
+    );    
   }
 }
