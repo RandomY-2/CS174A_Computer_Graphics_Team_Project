@@ -348,18 +348,21 @@ export class Assignment2 extends Base_Scene {
       let right_leg_y = this.right_stilt_model[2][2];
       let right_foot_y = right_leg_y - 20 * this.right_stilt_model[1][1];
       
-      let front_z = (left_foot_z > right_foot_z) ? left_foot_z : right_foot_z;
-      let front_y = (left_foot_z > right_foot_z) ? left_foot_y : right_foot_y;
+      let front_z = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
+      let front_y = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
+
+      let back_z = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
+      let back_y = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
 
       if (this.lean_forward) {
-        this.lean = Mat4.translation(0, left_foot_y, left_foot_z)
+        this.lean = Mat4.translation(0, front_y, front_z)
                         .times(Mat4.rotation(lean_angle, 1, 0, 0))
-                        .times(Mat4.translation(0, 0 - left_foot_y, 0 - left_foot_z))
+                        .times(Mat4.translation(0, 0 - front_y, 0 - front_z))
                         .times(this.lean);
       } else if (this.lean_backward) {
-        this.lean = Mat4.translation(0, left_foot_y, left_foot_z)
+        this.lean = Mat4.translation(0, back_y, back_z)
                         .times(Mat4.rotation(0 - lean_angle, 1, 0, 0))
-                        .times(Mat4.translation(0, 0 - left_foot_y, 0 - left_foot_z))
+                        .times(Mat4.translation(0, 0 - back_y, 0 - back_z))
                         .times(this.lean);
       } 
 
