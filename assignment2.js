@@ -48,6 +48,7 @@ class Base_Scene extends Scene {
     this.left_lift = this.right_lift = false;
     this.left_rotate_forward = this.right_rotate_forward = false;
     this.left_rotate_backward = this.right_rotate_backward = false;
+    this.lean_forward = this.lean_backward = false;
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new Stilt(),
@@ -95,7 +96,8 @@ export class Assignment2 extends Base_Scene {
     super();
     this.left_stilt_time = new Date().getTime() / 1000;
     this.right_stilt_time = new Date().getTime() / 1000;
-    this.left_rotate_time = new Date().getTime() / 1000;
+    this.rotate_time = new Date().getTime() / 1000;
+    this.lean_time = new Date().getTime() / 1000;
 
     this.left_stilt_model = Mat4.identity();
     this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
@@ -140,19 +142,28 @@ export class Assignment2 extends Base_Scene {
     this.key_triggered_button("Rotate Forward", ["g"], () => {
       this.left_rotate_forward = true;
       this.right_rotate_forward = true;
-      this.left_rotate_time = new Date().getTime() / 1000;
+      this.rotate_time = new Date().getTime() / 1000;
     }, this.keyboard_color, () => {
       this.left_rotate_forward = false;
       this.right_rotate_forward = false;
     });
-    this.key_triggered_button("Rotate Forward", ["b"], () => {
+    this.key_triggered_button("Rotate Backward", ["b"], () => {
       this.left_rotate_backward = true;
       this.right_rotate_backward = true;
-      this.left_rotate_time = new Date().getTime() / 1000;
+      this.rotate_time = new Date().getTime() / 1000;
     }, this.keyboard_color, () => {
       this.left_rotate_backward = false;
       this.right_rotate_backward = false;
     });
+    this.key_triggered_button("Lean Forward", ["g"], () => {
+      this.lean_forward = true;
+      this.lean_forward = true;
+      this.lean_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.lean_forward = false;
+      this.lean_forward = false;
+    });
+
   }
 
   draw_box(
@@ -180,6 +191,8 @@ export class Assignment2 extends Base_Scene {
 
     let max_rotation_angle = (0.25 * Math.PI);
     let stilt_rotation_angle = max_rotation_angle / 5;
+
+    
 
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
