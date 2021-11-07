@@ -22,15 +22,15 @@ class Stilt extends Shape {
     // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
         // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
         this.arrays.position = Vector3.cast(
-          [-1, -10, -1], [1, -10, -1], [-1, -10, 1], [1, -10, 1], [1, 10, -1], [-1, 10, -1], [1, 10, 1], [-1, 10, 1],
-          [-1, -10, -1], [-1, -10, 1], [-1, 10, -1], [-1, 10, 1], [1, -10, 1], [1, -10, -1], [1, 10, 1], [1, 10, -1],
-          [-1, -10, 1], [1, -10, 1], [-1, 10, 1], [1, 10, 1], [1, -10, -1], [-1, -10, -1], [1, 10, -1], [-1, 10, -1]);
+          [-1, -20, -1], [1, -20, -1], [-1, -20, 1], [1, -20, 1], [1, 20, -1], [-1, 20, -1], [1, 20, 1], [-1, 20, 1],
+          [-1, -20, -1], [-1, -20, 1], [-1, 20, -1], [-1, 20, 1], [1, -20, 1], [1, -20, -1], [1, 20, 1], [1, 20, -1],
+          [-1, -20, 1], [1, -20, 1], [-1, 20, 1], [1, 20, 1], [1, -20, -1], [-1, -20, -1], [1, 20, -1], [-1, 20, -1]);
       this.arrays.normal = Vector3.cast(
           [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
           [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
           [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]);
       // Arrange the vertices into a square shape in texture space too:
-      this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
+      this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 20, 9, 11, 20, 12, 13,
           14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
       }
     }
@@ -75,7 +75,7 @@ class Base_Scene extends Scene {
         (context.scratchpad.controls = new defs.Movement_Controls())
       );
       // Define the global camera and projection matrices, which are stored in program_state.
-      program_state.set_camera(Mat4.translation(5, -10, -30));
+      program_state.set_camera(Mat4.translation(5, -20, -30));
     }
     program_state.projection_transform = Mat4.perspective(
       Math.PI / 4,
@@ -98,7 +98,7 @@ export class Assignment2 extends Base_Scene {
     this.left_rotate_time = new Date().getTime() / 1000;
 
     this.left_stilt_model = Mat4.identity();
-    this.right_stilt_model = Mat4.translation(-10, 0, 0).times(Mat4.identity());
+    this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
 
     this.stilt_max_height = 5;
     this.keyboard_color = "#6E6460";
@@ -196,7 +196,7 @@ export class Assignment2 extends Base_Scene {
     if (this.left_rotate_forward && this.left_lift) {
       if (this.left_stilt_model[2][1] < 0.7) {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(stilt_rotation_angle / 10, 1, 0, 0))
+          .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.left_stilt_model);
       }
@@ -205,7 +205,7 @@ export class Assignment2 extends Base_Scene {
     if (this.left_rotate_backward && this.left_lift) {
       if (this.left_stilt_model[2][1] > -0.7) {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(-1 * stilt_rotation_angle / 10, 1, 0, 0))
+          .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.left_stilt_model);
       }
@@ -226,14 +226,14 @@ export class Assignment2 extends Base_Scene {
       if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
         this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
       } else {
-        this.right_stilt_model = Mat4.translation(-10, 0, 0).times(Mat4.identity());
+        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
       }
     }
 
     if (this.right_rotate_forward && this.right_lift) {
       if (this.right_stilt_model[2][1] < 0.7) {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(stilt_rotation_angle / 10, 1, 0, 0))
+          .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.right_stilt_model);
       }
@@ -242,7 +242,7 @@ export class Assignment2 extends Base_Scene {
     if (this.right_rotate_backward && this.right_lift) {
       if (this.right_stilt_model[2][1] > -0.7) {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(-1 * stilt_rotation_angle / 10, 1, 0, 0))
+          .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.right_stilt_model);
       }
