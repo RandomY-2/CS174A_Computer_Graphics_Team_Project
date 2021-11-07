@@ -141,6 +141,7 @@ export class Assignment2 extends Base_Scene {
 
     this.left_stilt_model = Mat4.identity();
     this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
+    this.lean = Mat4.identity();
 
     this.stilt_max_height = 5;
     this.keyboard_color = "#6E6460";
@@ -195,13 +196,21 @@ export class Assignment2 extends Base_Scene {
       this.left_rotate_backward = false;
       this.right_rotate_backward = false;
     });
-    this.key_triggered_button("Lean Forward", ["g"], () => {
+    this.key_triggered_button("Lean Forward", ["i"], () => {
       this.lean_forward = true;
       this.lean_forward = true;
       this.lean_time = new Date().getTime() / 1000;
     }, this.keyboard_color, () => {
       this.lean_forward = false;
       this.lean_forward = false;
+    });
+    this.key_triggered_button("Lean Backward", ["k"], () => {
+      this.lean_backward = true;
+      this.lean_backward = true;
+      this.lean_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.lean_backward = false;
+      this.lean_backward = false;
     });
 
   }
@@ -231,18 +240,25 @@ export class Assignment2 extends Base_Scene {
 
     let max_rotation_angle = (0.25 * Math.PI);
     let stilt_rotation_angle = max_rotation_angle / 5;
+    let lean_angle = max_rotation_angle / 10;
 
-    
+    if (this.lean_forward) {
+      this.lean = Mat4.rotation(Math.PI/100, 1, 0, 0);
+    } else if (this.lean_backward) {
+      this.lean = Mat4.rotation(lean_angle, 1, 0, 0);
+    } else {
+      this.lean = Mat4.identity();
+    }
 
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
-        this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
+        this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.lean).times(this.left_stilt_model);
       }
     } else {
       if (this.left_stilt_model[1][3] - (new Date().getTime() / 1000 - this.left_stilt_time) >= 0) {
-        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
+        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.lean).times(this.left_stilt_model);
       } else {
-        this.left_stilt_model = Mat4.identity();
+        this.left_stilt_model = this.lean.times(Mat4.identity());
       }
     }
 
@@ -251,7 +267,7 @@ export class Assignment2 extends Base_Scene {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.left_stilt_model);
+          .times(this.lean).times(this.left_stilt_model);
       }
     }
 
@@ -260,7 +276,7 @@ export class Assignment2 extends Base_Scene {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.left_stilt_model);
+          .times(this.lean).times(this.left_stilt_model);
       }
     }
 
@@ -273,13 +289,13 @@ export class Assignment2 extends Base_Scene {
 
     if (this.right_lift) {
       if (this.right_stilt_model[1][3] + (new Date().getTime() / 1000 - this.right_stilt_time) < this.stilt_max_height) {
-        this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
+        this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.lean).times(this.right_stilt_model);
       }
     } else {
       if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
-        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
+        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.lean).times(this.right_stilt_model);
       } else {
-        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
+        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(this.lean).times(Mat4.identity());
       }
     }
 
@@ -288,7 +304,7 @@ export class Assignment2 extends Base_Scene {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.right_stilt_model);
+          .times(this.lean).times(this.right_stilt_model);
       }
     }
 
@@ -297,7 +313,7 @@ export class Assignment2 extends Base_Scene {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
-          .times(this.right_stilt_model);
+          .times(this.lean).times(this.right_stilt_model);
       }
     }
 
