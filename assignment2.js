@@ -337,12 +337,12 @@ export class Assignment2 extends Base_Scene {
       }
 
       // character
-      const scale_factor = 3;
-      const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
-        scale_factor,
-        scale_factor,
-        scale_factor
-      ).times(Mat4.identity()));
+      // const scale_factor = 3;
+      // const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+      //   scale_factor,
+      //   scale_factor,
+      //   scale_factor
+      // ).times(Mat4.identity()));
       
 
       // character head
