@@ -14,6 +14,7 @@ const {
   Shape,
   Material,
   Scene,
+  Shader,
 } = tiny;
 
 class Stilt extends Shape {
@@ -52,6 +53,7 @@ class Base_Scene extends Scene {
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new Stilt(),
+      sphere_4: new defs.Subdivision_Sphere(4),
     };
 
     // *** Materials
@@ -61,9 +63,46 @@ class Base_Scene extends Scene {
         diffusivity: 0.6,
         color: hex_color("#ffffff"),
       }),
+
+      sun_material: new Material(new defs.Phong_Shader(), {
+        ambient: 1.0,
+        diffusivity: 0.6,
+        color: hex_color("#992828"),
+      }),
     };
     // The white material and basic shader are used for drawing the outline.
     this.white = new Material(new defs.Basic_Shader());
+
+    this.initial_camera_location = Mat4.look_at(
+      vec3(0, 10, 20),
+      vec3(0, 0, 0),
+      vec3(0, 1, 0)
+    );
+  }
+
+  draw_sun(context, program_state) {
+    const scale_factor = 30;
+    const sun_color = color(1, 1, 1, 1);
+
+    const sun_model_transform = Mat4.translation(-50, 50, 50).times(Mat4.scale(
+      scale_factor,
+      scale_factor,
+      scale_factor
+    ).times(Mat4.identity()));
+
+    const light_position = vec4(-50, 50, 50, 1);
+    program_state.lights = [
+      new Light(light_position, sun_color, 1000 ** scale_factor),
+    ];
+
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      sun_model_transform,
+      this.materials.sun_material.override({
+        color: sun_color,
+      })
+    );
   }
 
   display(context, program_state) {
@@ -86,8 +125,9 @@ class Base_Scene extends Scene {
     );
 
     // *** Lights: *** Values of vector or point lights.
-    const light_position = vec4(0, 5, 5, 1);
-    program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+    this.draw_sun(context, program_state);
+    // const light_position = vec4(0, 5, 5, 1);
+    // program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
   }
 }
 
