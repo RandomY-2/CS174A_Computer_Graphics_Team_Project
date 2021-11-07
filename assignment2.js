@@ -216,28 +216,24 @@ export class Assignment2 extends Base_Scene {
   draw_character_head(
     context,
     program_state,
+    model_transform,
+    color
   ){
-    const scale_factor = 3;
-    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
-      scale_factor,
-      scale_factor,
-      scale_factor
-    ).times(Mat4.identity()));
 
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      character_transform,
-      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      model_transform,
+      color
     );
-    return character_transform;
+    return model_transform;
   }
 
   draw_character_body(
     context,
     program_state,
   ){
-    
+
   }
 
   display(context, program_state) {
@@ -322,8 +318,20 @@ export class Assignment2 extends Base_Scene {
       this.materials.plastic.override({ color: blue })
     );
 
+
     // character
-    this.draw_character_head(context, program_state)
+    const scale_factor = 3;
+    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+      scale_factor,
+      scale_factor,
+      scale_factor
+    ).times(Mat4.identity()));
+    this.draw_character_head(
+      context, 
+      program_state,
+      character_transform,
+      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      )
     this.draw_character_body(context, program_state)
   }
 }
