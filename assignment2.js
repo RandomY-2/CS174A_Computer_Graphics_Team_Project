@@ -36,6 +36,7 @@ class Stilt extends Shape {
       }
     }
 
+
 class Base_Scene extends Scene {
   /**
    *  **Base_scene** is a Scene that can be added to any display canvas.
@@ -219,7 +220,6 @@ export class Assignment2 extends Base_Scene {
     model_transform,
     color
   ){
-
     this.shapes.sphere_4.draw(
       context,
       program_state,
@@ -232,8 +232,16 @@ export class Assignment2 extends Base_Scene {
   draw_character_body(
     context,
     program_state,
+    model_transform,
+    color,
   ){
-
+    this.shapes.stilt.draw(
+      context,
+      program_state,
+      model_transform,
+      color,      
+    )
+    return model_transform;
   }
 
   display(context, program_state) {
@@ -319,9 +327,9 @@ export class Assignment2 extends Base_Scene {
     );
 
 
-    // character
-    const scale_factor = 3;
-    const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+    // character head
+    const scale_factor = 4;
+    const character_head_transform = Mat4.translation(-10, 20, 0).times(Mat4.scale(
       scale_factor,
       scale_factor,
       scale_factor
@@ -329,9 +337,17 @@ export class Assignment2 extends Base_Scene {
     this.draw_character_head(
       context,
       program_state,
-      character_transform,
+      character_head_transform,
       this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
       )
-    this.draw_character_body(context, program_state)
+    
+    // character body
+    const character_body_transform = Mat4.translation(-10,5,0).times(Mat4.scale(5,0.3,5)).times(Mat4.identity());
+    this.draw_character_body(
+      context, 
+      program_state,
+      character_body_transform,
+      this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
+      )
   }
 }
