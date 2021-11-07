@@ -5,7 +5,7 @@ const {
   Vector3,
   vec,
   vec3,
-  vec4, 
+  vec4,
   color,
   hex_color,
   Matrix,
@@ -327,7 +327,7 @@ export class Assignment2 extends Base_Scene {
       scale_factor
     ).times(Mat4.identity()));
     this.draw_character_head(
-      context, 
+      context,
       program_state,
       character_transform,
       this.materials.plastic.override({ color: color(Math.random(), Math.random(), Math.random(), 1.0) })
