@@ -1,5 +1,7 @@
 import { defs, tiny } from "./examples/common.js";
 
+import { Body } from './examples/collisions-demo.js';
+
 const {
   Vector,
   Vector3,
@@ -50,7 +52,7 @@ class Base_Scene extends Scene {
     this.left_lift = this.right_lift = false;
     this.left_rotate_forward = this.right_rotate_forward = false;
     this.left_rotate_backward = this.right_rotate_backward = false;
-    this.lean_forward = this.lean_backward = false;
+    this.lean_backward = this.lean_forward = false;
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new Stilt(),
@@ -125,6 +127,7 @@ class Base_Scene extends Scene {
       100
     );
 
+
     // *** Lights: *** Values of vector or point lights.
     this.draw_sun(context, program_state);
     // const light_position = vec4(0, 5, 5, 1);
@@ -143,6 +146,7 @@ export class Assignment2 extends Base_Scene {
     this.left_stilt_model = Mat4.identity();
     this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
     this.lean = Mat4.identity();
+    this.gravity = 0;
 
     this.stilt_max_height = 5;
     this.keyboard_color = "#6E6460";
@@ -197,14 +201,6 @@ export class Assignment2 extends Base_Scene {
       this.left_rotate_backward = false;
       this.right_rotate_backward = false;
     });
-    this.key_triggered_button("Lean Forward", ["i"], () => {
-      this.lean_forward = true;
-      this.lean_forward = true;
-      this.lean_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.lean_forward = false;
-      this.lean_forward = false;
-    });
     this.key_triggered_button("Lean Backward", ["k"], () => {
       this.lean_backward = true;
       this.lean_backward = true;
@@ -212,6 +208,14 @@ export class Assignment2 extends Base_Scene {
     }, this.keyboard_color, () => {
       this.lean_backward = false;
       this.lean_backward = false;
+    });
+    this.key_triggered_button("Lean Forward", ["i"], () => {
+      this.lean_forward = true;
+      this.lean_forward = true;
+      this.lean_time = new Date().getTime() / 1000;
+    }, this.keyboard_color, () => {
+      this.lean_forward = false;
+      this.lean_forward = false;
     });
 
   }
@@ -265,14 +269,20 @@ export class Assignment2 extends Base_Scene {
   }
 
   display(context, program_state) {
+    this.gravity += -0.1;
+
     super.display(context, program_state);
     const blue = hex_color("#1a9ffa");
-    const salmon = hex_color("FFA07A")
+    const salmon = hex_color("FFA07A");
+    const grey = hex_color("888888");
     let t = new Date().getTime() / 1000;
 
     let max_rotation_angle = (0.25 * Math.PI);
     let stilt_rotation_angle = max_rotation_angle / 5;
     let lean_angle = max_rotation_angle / 100;
+
+
+    let ground_model = Mat4.translation(0, -40, -50).times(Mat4.scale(100, 0.01, 100));
 
 
     if (this.left_lift) {
@@ -305,7 +315,7 @@ export class Assignment2 extends Base_Scene {
       }
     }
 
-    
+
     if (this.right_lift) {
       if (this.right_stilt_model[1][3] + (new Date().getTime() / 1000 - this.right_stilt_time) < this.stilt_max_height) {
         this.right_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
@@ -317,7 +327,7 @@ export class Assignment2 extends Base_Scene {
         this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
       }
     }
-    
+
     if (this.right_rotate_forward && this.right_lift) {
       if (this.right_stilt_model[2][1] < 0.7) {
         this.right_stilt_model = Mat4.translation(0, 8, 0)
@@ -326,7 +336,7 @@ export class Assignment2 extends Base_Scene {
           .times(this.right_stilt_model);
         }
       }
-      
+
       if (this.right_rotate_backward && this.right_lift) {
         if (this.right_stilt_model[2][1] > -0.7) {
           this.right_stilt_model = Mat4.translation(0, 8, 0)
@@ -343,7 +353,7 @@ export class Assignment2 extends Base_Scene {
       //   scale_factor,
       //   scale_factor
       // ).times(Mat4.identity()));
-      
+
 
       // character head
       const scale_factor = 4;
@@ -376,51 +386,53 @@ export class Assignment2 extends Base_Scene {
         scale_factor_torse,
         scale_factor_torse,
         scale_factor_torse
-      ).times(Mat4.identity()));    
+      ).times(Mat4.identity()));
 
 
       // lean
-      
+
       let left_leg_z = this.left_stilt_model[2][3];
       let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
-      let right_leg_z = this.right_stilt_model[2][3];      
+      let right_leg_z = this.right_stilt_model[2][3];
       let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
       let left_leg_y = this.left_stilt_model[2][2];
-      let left_foot_y = left_leg_y - 20 * this.left_stilt_model[1][1];
+      let left_foot_y = left_leg_y - 20 * this.left_stilt_model[1][1] + this.gravity;
       let right_leg_y = this.right_stilt_model[2][2];
       let right_foot_y = right_leg_y - 20 * this.right_stilt_model[1][1];
-      
+
       let front_z = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
       let front_y = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
 
       let back_z = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
       let back_y = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
 
-      if (this.lean_forward) {
+      if (this.lean_backward) {
         this.lean = Mat4.translation(0, front_y, front_z)
                         .times(Mat4.rotation(lean_angle, 1, 0, 0))
                         .times(Mat4.translation(0, 0 - front_y, 0 - front_z))
                         .times(this.lean);
-      } else if (this.lean_backward) {
+      } else if (this.lean_forward) {
         this.lean = Mat4.translation(0, back_y, back_z)
                         .times(Mat4.rotation(0 - lean_angle, 1, 0, 0))
                         .times(Mat4.translation(0, 0 - back_y, 0 - back_z))
                         .times(this.lean);
-      } 
+      }
 
       // start drawing
-
+      // left stilt
       this.shapes.stilt.draw(
         context,
         program_state,
-        this.lean.times(this.left_stilt_model),
+        Mat4.translation(0, this.gravity, 0).times(this.lean.times(this.left_stilt_model)),
         this.materials.plastic.override({ color: blue })
       );
-
+      // ground
+      this.shapes.stilt.draw(context, program_state, ground_model, this.materials.plastic.override({ color: grey }));
+      // right stilt
       this.shapes.stilt.draw(
         context,
-      program_state,
-      this.lean.times(this.right_stilt_model),
+        program_state,
+        Mat4.translation(0, this.gravity, 0).times(this.lean).times(this.right_stilt_model),
       this.materials.plastic.override({ color: blue })
     );
 
@@ -428,7 +440,7 @@ export class Assignment2 extends Base_Scene {
     this.draw_character_head(
       context,
       program_state,
-      this.lean.times(character_head_transform),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_head_transform)),
       this.materials.plastic.override({ color: salmon })
       )
 
@@ -437,34 +449,42 @@ export class Assignment2 extends Base_Scene {
     this.draw_character_body(
       context,
       program_state,
-      this.lean.times(character_body_transform),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_body_transform)),
       this.materials.plastic.override({ color: salmon })
     )
 
-    
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      this.lean.times(character_upper_left),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_upper_left)),
       this.materials.plastic.override({ color: salmon })
     );
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      this.lean.times(character_upper_right),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_upper_right)),
       this.materials.plastic.override({ color: salmon })
     );
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      this.lean.times(character_lower_left),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_lower_left)),
       this.materials.plastic.override({ color: salmon })
     );
     this.shapes.sphere_4.draw(
       context,
       program_state,
-      this.lean.times(character_lower_right),
+      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_lower_right)),
       this.materials.plastic.override({ color: salmon })
-    );    
+    );
+
+    const camera_model =  Mat4.scale(-1, 1, 1).times(Mat4.inverse(Mat4.translation(0, this.gravity, 0).times(this.lean.times(Mat4.translation(-12.5, 50, 70).times(Mat4.rotation(-Math.PI / 7, 1, 0, 0).times(Mat4.identity()))))));
+    program_state.set_camera(camera_model);
+
+    console.log(left_foot_y);
+    if (left_foot_y <= ground_model[1][3]) {
+      this.gravity += 0.1;
+
+    }
   }
 }

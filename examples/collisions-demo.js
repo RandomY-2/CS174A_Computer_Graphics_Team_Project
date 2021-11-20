@@ -320,6 +320,7 @@ export class Collision_Demo extends Simulation {
             // *** Collision process is here ***
             // Loop through all bodies again (call each "b"):
             for (let b of this.bodies) {
+
                 // Pass the two bodies and the collision shape to check_if_colliding():
                 if (!a.check_if_colliding(b, collider))
                     continue;
