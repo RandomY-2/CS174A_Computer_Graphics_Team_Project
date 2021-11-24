@@ -286,7 +286,7 @@ export class Assignment2 extends Base_Scene {
     let ground_model = Mat4.translation(0, -40, -50).times(Mat4.scale(100, 0.01, 100));
 
 
-    if (this.left_lift && !this.stilt_touch_ground) {
+    if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
         this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
       }
@@ -298,7 +298,7 @@ export class Assignment2 extends Base_Scene {
       }
     }
 
-    if (this.left_rotate_forward && this.left_lift && !this.stilt_touch_ground) {
+    if (this.left_rotate_forward && this.left_lift) {
       if (this.left_stilt_model[2][1] < 0.7) {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
@@ -307,7 +307,7 @@ export class Assignment2 extends Base_Scene {
       }
     }
 
-    if (this.left_rotate_backward && this.left_lift && !this.stilt_touch_ground) {
+    if (this.left_rotate_backward && this.left_lift) {
       if (this.left_stilt_model[2][1] > -0.7) {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
           .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
@@ -407,6 +407,18 @@ export class Assignment2 extends Base_Scene {
       let back_z = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
       let back_y = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
 
+      this.left_stilt_bottom = (
+        this.lean.times(
+          this.left_stilt_model.times(vec4(0, -20, 0, 1)
+        )
+      ).plus(vec4(0, this.gravity, 0, 0)));
+
+      this.right_stilt_bottom = (
+        this.lean.times(
+          this.right_stilt_model.times(vec4(0, -20, 0, 1)
+        )
+      ).plus(vec4(0, this.gravity, 0, 0)));
+
       if (this.lean_backward && !this.stilt_touch_ground) {
         this.lean = Mat4.translation(0, front_y, front_z)
                         .times(Mat4.rotation(lean_angle, 1, 0, 0))
@@ -485,21 +497,37 @@ export class Assignment2 extends Base_Scene {
     if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
       this.gravity += 0.1;
     }
-    if (Math.min(left_foot_y, right_foot_y) < ground_model[1][3]) {
+    if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
       this.gravity += 0.1;
     }
 
-    if (this.left_lift || this.lean) {
-      let left_stilt_bottom = (
-        this.lean.times(
-          this.left_stilt_model.times(vec4(0, -20, 0, 1)
-        )
-      ).plus(vec4(0, this.gravity, 0, 0)));
+    if ((this.left_lift || this.right_lift) && (this.lean_forward || this.lean_backward)) {
+      if (this.left_lift) {
+        console.log(this.left_stilt_bottom[1]);
+        if (this.left_stilt_bottom[1] <= ground_model[1][3]) {
+          this.stilt_touch_ground = true;
+        } else {
+          this.stilt_touch_ground = false;
+        }
+      }
 
-      console.log(left_stilt_bottom[1], ground_model[1][3]);
-      if (left_stilt_bottom[1] <= (ground_model[1][3] - 1.75) && (this.left_lift)) {
-        this.stilt_touch_ground = true;
-      } else {
+      if (this.right_lift) {
+        if (this.right_stilt_bottom[1] <= ground_model[1][3]) {
+          this.stilt_touch_ground = true;
+        } else {
+          this.stilt_touch_ground = false;
+        }
+      }
+
+      if (this.left_lift && this.left_stilt_bottom[2] < -0.5 && this.lean_backward) {
+        this.stilt_touch_ground = false;
+      } else if (this.left_lift && this.left_stilt_bottom[2] > 0.5 && this.lean_forward) {
+        this.stilt_touch_ground = false;
+      }
+
+      if (this.right_lift && this.right_stilt_bottom[2] < -0.5 && this.lean_backward) {
+        this.stilt_touch_ground = false;
+      } else if (this.right_lift && this.right_stilt_bottom[2] > 0.5 && this.lean_forward) {
         this.stilt_touch_ground = false;
       }
     }
