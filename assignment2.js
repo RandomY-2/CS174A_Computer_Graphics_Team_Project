@@ -1,6 +1,6 @@
 import { defs, tiny } from "./examples/common.js";
 
-import { Body } from './examples/collisions-demo.js';
+import { Body } from "./examples/collisions-demo.js";
 
 const {
   Vector,
@@ -23,21 +23,100 @@ class Stilt extends Shape {
   constructor() {
     super("position", "normal");
     // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
-        // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
-        this.arrays.position = Vector3.cast(
-          [-1, -20, -1], [1, -20, -1], [-1, -20, 1], [1, -20, 1], [1, 20, -1], [-1, 20, -1], [1, 20, 1], [-1, 20, 1],
-          [-1, -20, -1], [-1, -20, 1], [-1, 20, -1], [-1, 20, 1], [1, -20, 1], [1, -20, -1], [1, 20, 1], [1, 20, -1],
-          [-1, -20, 1], [1, -20, 1], [-1, 20, 1], [1, 20, 1], [1, -20, -1], [-1, -20, -1], [1, 20, -1], [-1, 20, -1]);
-      this.arrays.normal = Vector3.cast(
-          [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
-          [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
-          [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]);
-      // Arrange the vertices into a square shape in texture space too:
-      this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 20, 9, 11, 20, 12, 13,
-          14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
-      }
-    }
-
+    // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
+    this.arrays.position = Vector3.cast(
+      [-1, -20, -1],
+      [1, -20, -1],
+      [-1, -20, 1],
+      [1, -20, 1],
+      [1, 20, -1],
+      [-1, 20, -1],
+      [1, 20, 1],
+      [-1, 20, 1],
+      [-1, -20, -1],
+      [-1, -20, 1],
+      [-1, 20, -1],
+      [-1, 20, 1],
+      [1, -20, 1],
+      [1, -20, -1],
+      [1, 20, 1],
+      [1, 20, -1],
+      [-1, -20, 1],
+      [1, -20, 1],
+      [-1, 20, 1],
+      [1, 20, 1],
+      [1, -20, -1],
+      [-1, -20, -1],
+      [1, 20, -1],
+      [-1, 20, -1]
+    );
+    this.arrays.normal = Vector3.cast(
+      [0, -1, 0],
+      [0, -1, 0],
+      [0, -1, 0],
+      [0, -1, 0],
+      [0, 1, 0],
+      [0, 1, 0],
+      [0, 1, 0],
+      [0, 1, 0],
+      [-1, 0, 0],
+      [-1, 0, 0],
+      [-1, 0, 0],
+      [-1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0],
+      [0, 0, 1],
+      [0, 0, 1],
+      [0, 0, 1],
+      [0, 0, 1],
+      [0, 0, -1],
+      [0, 0, -1],
+      [0, 0, -1],
+      [0, 0, -1]
+    );
+    // Arrange the vertices into a square shape in texture space too:
+    this.indices.push(
+      0,
+      1,
+      2,
+      1,
+      3,
+      2,
+      4,
+      5,
+      6,
+      5,
+      7,
+      6,
+      8,
+      9,
+      20,
+      9,
+      11,
+      20,
+      12,
+      13,
+      14,
+      13,
+      15,
+      14,
+      16,
+      17,
+      18,
+      17,
+      19,
+      18,
+      20,
+      21,
+      22,
+      21,
+      23,
+      22
+    );
+  }
+}
 
 class Base_Scene extends Scene {
   /**
@@ -47,7 +126,11 @@ class Base_Scene extends Scene {
   constructor() {
     // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
     super();
+
     this.stilt_touch_ground = false;
+    this.left_stilt_touch_ground = false;
+    this.right_stilt_touch_ground = false;
+
     this.outline = false;
     this.hover = this.swarm = false;
     this.left_lift = this.right_lift = false;
@@ -88,16 +171,14 @@ class Base_Scene extends Scene {
     const scale_factor = 5;
     const sun_color = color(1, 1, 1, 1);
 
-    const sun_model_transform = Mat4.translation(-50, 30, 30).times(Mat4.scale(
-      scale_factor,
-      scale_factor,
-      scale_factor
-    ).times(Mat4.identity()));
+    const sun_model_transform = Mat4.translation(-50, 30, 30).times(
+      Mat4.scale(scale_factor, scale_factor, scale_factor).times(
+        Mat4.identity()
+      )
+    );
 
     const light_position = vec4(-50, 50, 50, 1);
-    program_state.lights = [
-      new Light(light_position, sun_color, 1000 ** 50),
-    ];
+    program_state.lights = [new Light(light_position, sun_color, 1000 ** 50)];
 
     this.shapes.sphere_4.draw(
       context,
@@ -128,7 +209,6 @@ class Base_Scene extends Scene {
       100
     );
 
-
     // *** Lights: *** Values of vector or point lights.
     this.draw_sun(context, program_state);
     // const light_position = vec4(0, 5, 5, 1);
@@ -143,6 +223,7 @@ export class Assignment2 extends Base_Scene {
     this.right_stilt_time = new Date().getTime() / 1000;
     this.rotate_time = new Date().getTime() / 1000;
     this.lean_time = new Date().getTime() / 1000;
+    this.lean_angle = 0;
 
     this.left_stilt_model = Mat4.identity();
     this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
@@ -172,59 +253,94 @@ export class Assignment2 extends Base_Scene {
 
   make_control_panel() {
     // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-    this.key_triggered_button("Lift Left", ["v"], () => {
-      this.left_lift = true;
-      this.left_stilt_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.left_lift = false;
-      this.left_stilt_time = new Date().getTime() / 1000;
-    });
-    this.key_triggered_button("Lift Right", ["n"], () => {
-      this.right_lift = true;
-      this.right_stilt_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.right_lift = false;
-      this.right_stilt_time = new Date().getTime() / 1000;
-    });
-    this.key_triggered_button("Rotate Forward", ["g"], () => {
-      this.left_rotate_forward = true;
-      this.right_rotate_forward = true;
-      this.rotate_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.left_rotate_forward = false;
-      this.right_rotate_forward = false;
-    });
-    this.key_triggered_button("Rotate Backward", ["b"], () => {
-      this.left_rotate_backward = true;
-      this.right_rotate_backward = true;
-      this.rotate_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.left_rotate_backward = false;
-      this.right_rotate_backward = false;
-    });
-    this.key_triggered_button("Lean Backward", ["k"], () => {
-      this.lean_backward = true;
-      this.lean_backward = true;
-      this.lean_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.lean_backward = false;
-      this.lean_backward = false;
-    });
-    this.key_triggered_button("Lean Forward", ["i"], () => {
-      this.lean_forward = true;
-      this.lean_forward = true;
-      this.lean_time = new Date().getTime() / 1000;
-    }, this.keyboard_color, () => {
-      this.lean_forward = false;
-      this.lean_forward = false;
-    });
-
+    this.key_triggered_button(
+      "Lift Left",
+      ["v"],
+      () => {
+        this.left_lift = true;
+        this.left_stilt_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.left_lift = false;
+        this.left_stilt_time = new Date().getTime() / 1000;
+      }
+    );
+    this.key_triggered_button(
+      "Lift Right",
+      ["n"],
+      () => {
+        this.right_lift = true;
+        this.right_stilt_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.right_lift = false;
+        this.right_stilt_time = new Date().getTime() / 1000;
+      }
+    );
+    this.key_triggered_button(
+      "Rotate Forward",
+      ["g"],
+      () => {
+        this.left_rotate_forward = true;
+        this.right_rotate_forward = true;
+        this.rotate_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.left_rotate_forward = false;
+        this.right_rotate_forward = false;
+      }
+    );
+    this.key_triggered_button(
+      "Rotate Backward",
+      ["b"],
+      () => {
+        this.left_rotate_backward = true;
+        this.right_rotate_backward = true;
+        this.rotate_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.left_rotate_backward = false;
+        this.right_rotate_backward = false;
+      }
+    );
+    this.key_triggered_button(
+      "Lean Backward",
+      ["k"],
+      () => {
+        this.lean_backward = true;
+        this.lean_backward = true;
+        this.lean_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.lean_backward = false;
+        this.lean_backward = false;
+      }
+    );
+    this.key_triggered_button(
+      "Lean Forward",
+      ["i"],
+      () => {
+        this.lean_forward = true;
+        this.lean_forward = true;
+        this.lean_time = new Date().getTime() / 1000;
+      },
+      this.keyboard_color,
+      () => {
+        this.lean_forward = false;
+        this.lean_forward = false;
+      }
+    );
   }
 
   draw_box(
     context,
     program_state,
-    model_transform,
+    model_transform
     // cube_color
   ) {
     // TODO:  Helper function for requirement 3 (see hint).
@@ -239,33 +355,13 @@ export class Assignment2 extends Base_Scene {
     return model_transform;
   }
 
-  draw_character_head(
-    context,
-    program_state,
-    model_transform,
-    color
-  ){
-    this.shapes.sphere_4.draw(
-      context,
-      program_state,
-      model_transform,
-      color
-    );
+  draw_character_head(context, program_state, model_transform, color) {
+    this.shapes.sphere_4.draw(context, program_state, model_transform, color);
     return model_transform;
   }
 
-  draw_character_body(
-    context,
-    program_state,
-    model_transform,
-    color,
-  ){
-    this.shapes.stilt.draw(
-      context,
-      program_state,
-      model_transform,
-      color,
-    )
+  draw_character_body(context, program_state, model_transform, color) {
+    this.shapes.stilt.draw(context, program_state, model_transform, color);
     return model_transform;
   }
 
@@ -278,13 +374,12 @@ export class Assignment2 extends Base_Scene {
     const grey = hex_color("888888");
     let t = new Date().getTime() / 1000;
 
-    let max_rotation_angle = (0.25 * Math.PI);
+    let max_rotation_angle = 0.25 * Math.PI;
     let stilt_rotation_angle = max_rotation_angle / 5;
-    let lean_angle = max_rotation_angle / 100;
 
-
-    let ground_model = Mat4.translation(0, -40, -50).times(Mat4.scale(100, 0.01, 100));
-
+    let ground_model = Mat4.translation(0, -40, -50).times(
+      Mat4.scale(100, 0.01, 100)
+    );
 
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
@@ -310,12 +405,11 @@ export class Assignment2 extends Base_Scene {
     if (this.left_rotate_backward && this.left_lift) {
       if (this.left_stilt_model[2][1] > -0.7) {
         this.left_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
+          .times(Mat4.rotation((-1 * stilt_rotation_angle) / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.left_stilt_model);
       }
     }
-
 
     if (this.right_lift) {
       if (this.right_stilt_model[1][3] + (new Date().getTime() / 1000 - this.right_stilt_time) < this.stilt_max_height) {
@@ -325,7 +419,9 @@ export class Assignment2 extends Base_Scene {
       if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
         this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
       } else {
-        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(Mat4.identity());
+        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(
+          Mat4.identity()
+        );
       }
     }
 
@@ -335,163 +431,261 @@ export class Assignment2 extends Base_Scene {
           .times(Mat4.rotation(stilt_rotation_angle / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.right_stilt_model);
-        }
       }
+    }
 
-      if (this.right_rotate_backward && this.right_lift) {
-        if (this.right_stilt_model[2][1] > -0.7) {
-          this.right_stilt_model = Mat4.translation(0, 8, 0)
-          .times(Mat4.rotation(-1 * stilt_rotation_angle / 20, 1, 0, 0))
+    if (this.right_rotate_backward && this.right_lift) {
+      if (this.right_stilt_model[2][1] > -0.7) {
+        this.right_stilt_model = Mat4.translation(0, 8, 0)
+          .times(Mat4.rotation((-1 * stilt_rotation_angle) / 20, 1, 0, 0))
           .times(Mat4.translation(0, -8, 0))
           .times(this.right_stilt_model);
-        }
       }
-
-      // character
-      // const scale_factor = 3;
-      // const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
-      //   scale_factor,
-      //   scale_factor,
-      //   scale_factor
-      // ).times(Mat4.identity()));
+    }
 
 
-      // character head
-      const scale_factor = 4;
-      const character_head_transform = Mat4.translation(-10, 20, 0).times(Mat4.scale(
-        scale_factor,
-        scale_factor,
-        scale_factor
-      ).times(Mat4.identity()));
+    // character
+    // const scale_factor = 3;
+    // const character_transform = Mat4.translation(-10, 10, 0).times(Mat4.scale(
+    //   scale_factor,
+    //   scale_factor,
+    //   scale_factor
+    // ).times(Mat4.identity()));
 
 
-      // character torso
-      // upper left hand
-      const scale_factor_torse = 2;
-      const character_upper_left = Mat4.translation(-18, 10, 0).times(Mat4.scale(
-        scale_factor_torse,
-        scale_factor_torse,
-        scale_factor_torse
-      ).times(Mat4.identity()));
-      const character_upper_right = Mat4.translation(-2, 10, 0).times(Mat4.scale(
-        scale_factor_torse,
-        scale_factor_torse,
-        scale_factor_torse
-      ).times(Mat4.identity()));
-      const character_lower_left = Mat4.translation(-18, -5, 0).times(Mat4.scale(
-        scale_factor_torse,
-        scale_factor_torse,
-        scale_factor_torse
-      ).times(Mat4.identity()));
-      const character_lower_right = Mat4.translation(-2, -5, 0).times(Mat4.scale(
-        scale_factor_torse,
-        scale_factor_torse,
-        scale_factor_torse
-      ).times(Mat4.identity()));
-
-
-      // lean
-
-      let left_leg_z = this.left_stilt_model[2][3];
-      let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
-      let right_leg_z = this.right_stilt_model[2][3];
-      let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
-      let left_leg_y = this.left_stilt_model[2][2];
-      let left_foot_y = left_leg_y - 20 * this.left_stilt_model[1][1] + this.gravity + this.left_stilt_model[1][3];
-      let right_leg_y = this.right_stilt_model[2][2];
-      let right_foot_y = right_leg_y - 20 * this.right_stilt_model[1][1] + this.gravity + this.right_stilt_model[1][3];
-
-      let front_z = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
-      let front_y = (left_foot_z >= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
-
-      let back_z = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_z : right_foot_z;
-      let back_y = (left_foot_z <= right_foot_z && left_foot_y == 0) ? left_foot_y : right_foot_y;
-
-      this.left_stilt_bottom = (
-        this.lean.times(
-          this.left_stilt_model.times(vec4(0, -20, 0, 1)
-        )
-      ).plus(vec4(0, this.gravity, 0, 0)));
-
-      this.right_stilt_bottom = (
-        this.lean.times(
-          this.right_stilt_model.times(vec4(0, -20, 0, 1)
-        )
-      ).plus(vec4(0, this.gravity, 0, 0)));
-
-      if (this.lean_backward && !this.stilt_touch_ground) {
-        this.lean = Mat4.translation(0, front_y, front_z)
-                        .times(Mat4.rotation(lean_angle, 1, 0, 0))
-                        .times(Mat4.translation(0, 0 - front_y, 0 - front_z))
-                        .times(this.lean);
-      } else if (this.lean_forward && !this.stilt_touch_ground) {
-        this.lean = Mat4.translation(0, back_y, back_z)
-                        .times(Mat4.rotation(0 - lean_angle, 1, 0, 0))
-                        .times(Mat4.translation(0, 0 - back_y, 0 - back_z))
-                        .times(this.lean);
-      }
-
-      // start drawing
-      // left stilt
-      this.shapes.stilt.draw(
-        context,
-        program_state,
-        Mat4.translation(0, this.gravity, 0).times(this.lean.times(this.left_stilt_model)),
-        this.materials.plastic.override({ color: blue })
-      );
-      // ground
-      this.shapes.stilt.draw(context, program_state, ground_model, this.materials.plastic.override({ color: grey }));
-      // right stilt
-      this.shapes.stilt.draw(
-        context,
-        program_state,
-        Mat4.translation(0, this.gravity, 0).times(this.lean).times(this.right_stilt_model),
-      this.materials.plastic.override({ color: blue })
+    // character head
+    const scale_factor = 4;
+    const character_head_transform = Mat4.translation(-10, 20, 0).times(
+      Mat4.scale(scale_factor, scale_factor, scale_factor).times(
+        Mat4.identity()
+      )
     );
 
+
+    // character torso
+    // upper left hand
+    const scale_factor_torse = 2;
+    const character_upper_left = Mat4.translation(-18, 10, 0).times(
+      Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity())
+    );
+    const character_upper_right = Mat4.translation(-2, 10, 0).times(
+      Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity())
+    );
+    const character_lower_left = Mat4.translation(-18, -5, 0).times(
+      Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity())
+    );
+    const character_lower_right = Mat4.translation(-2, -5, 0).times(
+      Mat4.scale(
+        scale_factor_torse,
+        scale_factor_torse,
+        scale_factor_torse
+      ).times(Mat4.identity())
+    );
+
+
+    // lean
+    let left_leg_z = this.left_stilt_model[2][3];
+    let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
+    let right_leg_z = this.right_stilt_model[2][3];
+    let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
+    let left_leg_y = this.left_stilt_model[2][2];
+    let left_foot_y =
+      left_leg_y -
+      20 * this.left_stilt_model[1][1] +
+      this.gravity +
+      this.left_stilt_model[1][3];
+    let right_leg_y = this.right_stilt_model[2][2];
+    let right_foot_y =
+      right_leg_y -
+      20 * this.right_stilt_model[1][1] +
+      this.gravity +
+      this.right_stilt_model[1][3];
+
+    let front_z =
+      left_foot_z >= right_foot_z && left_foot_y == 0
+        ? left_foot_z
+        : right_foot_z;
+    let front_y =
+      left_foot_z >= right_foot_z && left_foot_y == 0
+        ? left_foot_y
+        : right_foot_y;
+
+    let back_z =
+      left_foot_z <= right_foot_z && left_foot_y == 0
+        ? left_foot_z
+        : right_foot_z;
+    let back_y =
+      left_foot_z <= right_foot_z && left_foot_y == 0
+        ? left_foot_y
+        : right_foot_y;
+
+    this.left_stilt_bottom = this.lean
+      .times(this.left_stilt_model.times(vec4(0, -20, 0, 1)))
+      .plus(vec4(0, this.gravity, 0, 0));
+
+    this.right_stilt_bottom = this.lean
+      .times(this.right_stilt_model.times(vec4(0, -20, 0, 1)))
+      .plus(vec4(0, this.gravity, 0, 0));
+
+    if (this.lean_backward && !(this.left_stilt_touch_ground || this.right_stilt_touch_ground)) {
+      this.lean_angle += max_rotation_angle / 100;
+      if (!this.left_lift && !this.right_lift) {
+        if (Math.abs(left_foot_y - right_foot_y) <= 0.05) {
+          if (left_foot_y < right_foot_y) {
+            this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+          } else {
+            this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+          }
+        }
+      } else if (this.left_lift && this.right_lift) {
+        if (left_foot_y < right_foot_y) {
+          this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+        } else {
+          this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+        }
+      } else if (this.left_lift) {
+        this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+      } else {
+        this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+      }
+
+      // this.lean = Mat4.translation(0, front_y, front_z)
+      //                 .times(Mat4.rotation(lean_angle, 1, 0, 0))
+      //                 .times(Mat4.translation(0, 0 - front_y, 0 - front_z))
+      //                 .times(this.lean);
+    } else if (this.lean_forward && !(this.left_stilt_touch_ground || this.right_stilt_touch_ground)) {
+      this.lean_angle -= max_rotation_angle / 100;
+      if (!this.left_lift && !this.right_lift) {
+        if (left_foot_y < right_foot_y) {
+          this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+        } else {
+          this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+        }
+      } else if (this.left_lift && this.right_lift) {
+        if (Math.abs(left_foot_y - right_foot_y) <= 0.05) {
+          if (left_foot_y < right_foot_y) {
+            this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+          } else {
+            this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+          }
+        }
+      } else if (this.left_lift) {
+        this.lean = Mat4.translation(0, left_foot_y + 16, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -left_foot_y - 16, 0)));
+      } else {
+        this.lean = Mat4.translation(0, right_foot_y + 20, 0).times(Mat4.rotation(this.lean_angle, 1, 0, 0).times(Mat4.translation(0, -right_foot_y - 20, 0)));
+      }
+
+      // this.lean = Mat4.translation(0, back_y, back_z)
+      //                 .times(Mat4.rotation(0 - lean_angle, 1, 0, 0))
+      //                 .times(Mat4.translation(0, 0 - back_y, 0 - back_z))
+      //                 .times(this.lean);
+    }
+
+    // start drawing
+    // left stilt
+    this.shapes.stilt.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(this.left_stilt_model)
+      ),
+      this.materials.plastic.override({ color: blue })
+    );
+    // ground
+    this.shapes.stilt.draw(
+      context,
+      program_state,
+      ground_model,
+      this.materials.plastic.override({ color: grey })
+    );
+    // right stilt
+    this.shapes.stilt.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0)
+        .times(this.lean)
+        .times(this.right_stilt_model),
+      this.materials.plastic.override({ color: blue })
+    );
 
     this.draw_character_head(
       context,
       program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_head_transform)),
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_head_transform)
+      ),
       this.materials.plastic.override({ color: salmon })
-      )
+    );
 
     // character body
-    const character_body_transform = Mat4.translation(-10,5,0).times(Mat4.scale(5,0.3,5)).times(Mat4.identity());
+    const character_body_transform = Mat4.translation(-10, 5, 0)
+      .times(Mat4.scale(5, 0.3, 5))
+      .times(Mat4.identity());
     this.draw_character_body(
       context,
       program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_body_transform)),
-      this.materials.plastic.override({ color: salmon })
-    )
-
-    this.shapes.sphere_4.draw(
-      context,
-      program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_upper_left)),
-      this.materials.plastic.override({ color: salmon })
-    );
-    this.shapes.sphere_4.draw(
-      context,
-      program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_upper_right)),
-      this.materials.plastic.override({ color: salmon })
-    );
-    this.shapes.sphere_4.draw(
-      context,
-      program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_lower_left)),
-      this.materials.plastic.override({ color: salmon })
-    );
-    this.shapes.sphere_4.draw(
-      context,
-      program_state,
-      Mat4.translation(0, this.gravity, 0).times(this.lean.times(character_lower_right)),
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_body_transform)
+      ),
       this.materials.plastic.override({ color: salmon })
     );
 
-    const camera_model =  Mat4.scale(-1, 1, 1).times(Mat4.inverse(Mat4.translation(0, this.gravity, 0).times(this.lean.times(Mat4.translation(-12.5, 50, 70).times(Mat4.rotation(-Math.PI / 7, 1, 0, 0).times(Mat4.identity()))))));
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_upper_left)
+      ),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_upper_right)
+      ),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_lower_left)
+      ),
+      this.materials.plastic.override({ color: salmon })
+    );
+    this.shapes.sphere_4.draw(
+      context,
+      program_state,
+      Mat4.translation(0, this.gravity, 0).times(
+        this.lean.times(character_lower_right)
+      ),
+      this.materials.plastic.override({ color: salmon })
+    );
+
+    const camera_model = Mat4.scale(-1, 1, 1).times(
+      Mat4.inverse(
+        Mat4.translation(0, this.gravity, 0).times(
+          this.lean.times(
+            Mat4.translation(-12.5, 50, 70).times(
+              Mat4.rotation(-Math.PI / 7, 1, 0, 0).times(Mat4.identity())
+            )
+          )
+        )
+      )
+    );
     program_state.set_camera(camera_model);
 
     if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
@@ -501,34 +695,57 @@ export class Assignment2 extends Base_Scene {
       this.gravity += 0.1;
     }
 
-    if ((this.left_lift || this.right_lift) && (this.lean_forward || this.lean_backward)) {
+    if (!this.left_lift && !this.right_lift) {
+      this.left_stilt_touch_ground = false;
+      this.right_stilt_touch_ground = false;
+    }
+
+    if (
+      (this.left_lift || this.right_lift) &&
+      (this.lean_forward || this.lean_backward)
+    ) {
       if (this.left_lift) {
-        console.log(this.left_stilt_bottom[1]);
         if (this.left_stilt_bottom[1] <= ground_model[1][3]) {
-          this.stilt_touch_ground = true;
+          this.left_stilt_touch_ground = true;
         } else {
-          this.stilt_touch_ground = false;
+          this.left_stilt_touch_ground = false;
         }
       }
 
       if (this.right_lift) {
         if (this.right_stilt_bottom[1] <= ground_model[1][3]) {
-          this.stilt_touch_ground = true;
+          this.right_stilt_touch_ground = true;
         } else {
-          this.stilt_touch_ground = false;
+          this.right_stilt_touch_ground = false;
         }
       }
 
-      if (this.left_lift && this.left_stilt_bottom[2] < -0.5 && this.lean_backward) {
-        this.stilt_touch_ground = false;
-      } else if (this.left_lift && this.left_stilt_bottom[2] > 0.5 && this.lean_forward) {
-        this.stilt_touch_ground = false;
+      if (
+        this.left_lift &&
+        this.left_stilt_bottom[2] < -0.5 &&
+        this.lean_backward
+      ) {
+        this.left_stilt_touch_ground = false;
+      } else if (
+        this.left_lift &&
+        this.left_stilt_bottom[2] > 0.5 &&
+        this.lean_forward
+      ) {
+        this.left_stilt_touch_ground = false;
       }
 
-      if (this.right_lift && this.right_stilt_bottom[2] < -0.5 && this.lean_backward) {
-        this.stilt_touch_ground = false;
-      } else if (this.right_lift && this.right_stilt_bottom[2] > 0.5 && this.lean_forward) {
-        this.stilt_touch_ground = false;
+      if (
+        this.right_lift &&
+        this.right_stilt_bottom[2] < -0.5 &&
+        this.lean_backward
+      ) {
+        this.right_stilt_touch_ground = false;
+      } else if (
+        this.right_lift &&
+        this.right_stilt_bottom[2] > 0.5 &&
+        this.lean_forward
+      ) {
+        this.right_stilt_touch_ground = false;
       }
     }
   }
