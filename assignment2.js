@@ -381,16 +381,64 @@ export class Assignment2 extends Base_Scene {
       Mat4.scale(100, 0.01, 100)
     );
 
+    let left_leg_z = this.left_stilt_model[2][3];
+    let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
+    let right_leg_z = this.right_stilt_model[2][3];
+    let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
+    let left_leg_y = this.left_stilt_model[2][2];
+    let left_foot_y =
+      left_leg_y -
+      20 * this.left_stilt_model[1][1] +
+      this.gravity +
+      this.left_stilt_model[1][3];
+    let right_leg_y = this.right_stilt_model[2][2];
+    let right_foot_y =
+      right_leg_y -
+      20 * this.right_stilt_model[1][1] +
+      this.gravity +
+      this.right_stilt_model[1][3];
+
+    let front_z =
+      left_foot_z >= right_foot_z && left_foot_y == 0
+        ? left_foot_z
+        : right_foot_z;
+    let front_y =
+      left_foot_z >= right_foot_z && left_foot_y == 0
+        ? left_foot_y
+        : right_foot_y;
+
+    let back_z =
+      left_foot_z <= right_foot_z && left_foot_y == 0
+        ? left_foot_z
+        : right_foot_z;
+    let back_y =
+      left_foot_z <= right_foot_z && left_foot_y == 0
+        ? left_foot_y
+        : right_foot_y;
+
+    this.left_stilt_bottom = this.lean
+      .times(this.left_stilt_model.times(vec4(0, -20, 0, 1)))
+      .plus(vec4(0, this.gravity, 0, 0));
+
+    this.right_stilt_bottom = this.lean
+      .times(this.right_stilt_model.times(vec4(0, -20, 0, 1)))
+      .plus(vec4(0, this.gravity, 0, 0));
+
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
         this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
       }
     } else {
       if (this.left_stilt_model[1][3] - (new Date().getTime() / 1000 - this.left_stilt_time) >= 0) {
-        this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
-      } else {
-        this.left_stilt_model = Mat4.identity();
+        if (this.left_stilt_bottom[1] > ground_model[1][3]) {
+          this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
+        } else {
+          this.left_stilt_touch_ground = true;
+        }
       }
+      // else {
+      //   this.left_stilt_model = Mat4.identity();
+      // }
     }
 
     if (this.left_rotate_forward && this.left_lift) {
@@ -417,12 +465,17 @@ export class Assignment2 extends Base_Scene {
       }
     } else {
       if (this.right_stilt_model[1][3] - (new Date().getTime() / 1000 - this.right_stilt_time) >= 0) {
-        this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
-      } else {
-        this.right_stilt_model = Mat4.translation(-20, 0, 0).times(
-          Mat4.identity()
-        );
+        if (this.right_stilt_bottom[1] > ground_model[1][3]) {
+          this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
+        } else {
+          this.right_stilt_touch_ground = true;
+        }
       }
+      // else {
+      //   this.right_stilt_model = Mat4.translation(-20, 0, 0).times(
+      //     Mat4.identity()
+      //   );
+      // }
     }
 
     if (this.right_rotate_forward && this.right_lift) {
@@ -496,49 +549,6 @@ export class Assignment2 extends Base_Scene {
 
 
     // lean
-    let left_leg_z = this.left_stilt_model[2][3];
-    let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
-    let right_leg_z = this.right_stilt_model[2][3];
-    let right_foot_z = right_leg_z - 20 * this.right_stilt_model[2][1];
-    let left_leg_y = this.left_stilt_model[2][2];
-    let left_foot_y =
-      left_leg_y -
-      20 * this.left_stilt_model[1][1] +
-      this.gravity +
-      this.left_stilt_model[1][3];
-    let right_leg_y = this.right_stilt_model[2][2];
-    let right_foot_y =
-      right_leg_y -
-      20 * this.right_stilt_model[1][1] +
-      this.gravity +
-      this.right_stilt_model[1][3];
-
-    let front_z =
-      left_foot_z >= right_foot_z && left_foot_y == 0
-        ? left_foot_z
-        : right_foot_z;
-    let front_y =
-      left_foot_z >= right_foot_z && left_foot_y == 0
-        ? left_foot_y
-        : right_foot_y;
-
-    let back_z =
-      left_foot_z <= right_foot_z && left_foot_y == 0
-        ? left_foot_z
-        : right_foot_z;
-    let back_y =
-      left_foot_z <= right_foot_z && left_foot_y == 0
-        ? left_foot_y
-        : right_foot_y;
-
-    this.left_stilt_bottom = this.lean
-      .times(this.left_stilt_model.times(vec4(0, -20, 0, 1)))
-      .plus(vec4(0, this.gravity, 0, 0));
-
-    this.right_stilt_bottom = this.lean
-      .times(this.right_stilt_model.times(vec4(0, -20, 0, 1)))
-      .plus(vec4(0, this.gravity, 0, 0));
-
     if (this.lean_backward && !(this.left_stilt_touch_ground || this.right_stilt_touch_ground)) {
       this.lean_angle += max_rotation_angle / 100;
       if (!this.left_lift && !this.right_lift) {
