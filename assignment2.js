@@ -381,6 +381,10 @@ export class Assignment2 extends Base_Scene {
       Mat4.scale(100, 0.01, 100)
     );
 
+    let character_body_transform = Mat4.translation(-10, 5, 0)
+    .times(Mat4.scale(5, 0.3, 5))
+    .times(Mat4.identity());
+
     let left_leg_z = this.left_stilt_model[2][3];
     let left_foot_z = left_leg_z - 20 * this.left_stilt_model[2][1];
     let right_leg_z = this.right_stilt_model[2][3];
@@ -424,6 +428,15 @@ export class Assignment2 extends Base_Scene {
       .times(this.right_stilt_model.times(vec4(0, -20, 0, 1)))
       .plus(vec4(0, this.gravity, 0, 0));
 
+    console.log(left_foot_y);
+
+    if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
+      this.gravity += 0.1;
+    }
+    if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
+      this.gravity += 0.1;
+    }
+
     if (this.left_lift) {
       if (this.left_stilt_model[1][3] + (new Date().getTime() / 1000 - this.left_stilt_time) < this.stilt_max_height) {
         this.left_stilt_model = Mat4.translation(0, 1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
@@ -433,7 +446,8 @@ export class Assignment2 extends Base_Scene {
         if (this.left_stilt_bottom[1] > ground_model[1][3]) {
           this.left_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.left_stilt_time), 0).times(this.left_stilt_model);
         } else {
-          this.left_stilt_touch_ground = true;
+          this.left_stilt_model = Mat4.identity();
+          // this.left_stilt_touch_ground = true;
         }
       }
       // else {
@@ -468,7 +482,10 @@ export class Assignment2 extends Base_Scene {
         if (this.right_stilt_bottom[1] > ground_model[1][3]) {
           this.right_stilt_model = Mat4.translation(0, -1 * (new Date().getTime() / 1000 - this.right_stilt_time), 0).times(this.right_stilt_model);
         } else {
-          this.right_stilt_touch_ground = true;
+          this.right_stilt_model = Mat4.translation(-20, 0, 0).times(
+            Mat4.identity()
+          );
+          // this.right_stilt_touch_ground = true;
         }
       }
       // else {
@@ -546,7 +563,6 @@ export class Assignment2 extends Base_Scene {
         scale_factor_torse
       ).times(Mat4.identity())
     );
-
 
     // lean
     if (this.lean_backward && !(this.left_stilt_touch_ground || this.right_stilt_touch_ground)) {
@@ -640,9 +656,7 @@ export class Assignment2 extends Base_Scene {
     );
 
     // character body
-    const character_body_transform = Mat4.translation(-10, 5, 0)
-      .times(Mat4.scale(5, 0.3, 5))
-      .times(Mat4.identity());
+
     this.draw_character_body(
       context,
       program_state,
@@ -698,13 +712,6 @@ export class Assignment2 extends Base_Scene {
     );
     program_state.set_camera(camera_model);
 
-    if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
-      this.gravity += 0.1;
-    }
-    if (Math.min(left_foot_y, right_foot_y) <= ground_model[1][3]) {
-      this.gravity += 0.1;
-    }
-
     if (!this.left_lift && !this.right_lift) {
       this.left_stilt_touch_ground = false;
       this.right_stilt_touch_ground = false;
@@ -721,6 +728,8 @@ export class Assignment2 extends Base_Scene {
           this.left_stilt_touch_ground = false;
         }
       }
+
+      console.log(this.left_stilt_bottom[1], ground_model[1][3]);
 
       if (this.right_lift) {
         if (this.right_stilt_bottom[1] <= ground_model[1][3]) {
