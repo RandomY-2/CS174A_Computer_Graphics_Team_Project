@@ -1,5 +1,5 @@
 import { defs, tiny } from "./examples/common.js";
-
+import { Collision_Demo } from "./examples/collisions-demo.js";
 import { Transforms_Sandbox } from "./examples/transforms-sandbox.js";
 import { Assignment2 } from "./assignment2.js";
 // Pull these names into this module's scope for convenience:
