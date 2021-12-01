@@ -46,6 +46,7 @@ class Base_Scene extends Scene {
     this.shapes = {
       stilt: new defs.Cube(),
       ground: new defs.Cube(),
+      destination_flag: new defs.Cube(),
       sky: new Subdivision_Sphere(6),
       sphere: new Subdivision_Sphere(6),
       triangle: new defs.Triangle(),
@@ -60,7 +61,7 @@ class Base_Scene extends Scene {
         color_texture: null,
         light_depth_texture: null,
       }),
-      
+
       metal: new Material(new defs.Phong_Shader(),{
         ambient: .2, 
         diffusivity: .8, 
@@ -77,12 +78,19 @@ class Base_Scene extends Scene {
         light_depth_texture: null,
       }),
 
-      ground: new Material(new Texture_Scroll_X(), {
-        //color: hex_color("#9e6f00"),
+      destination_flag : new Material(new Texture_Scroll_X(), {
         color: hex_color("#000000"),
         ambient: 1,
-        //diffusivity: 0.1,
-        //specularity: 0.1,
+        texture: new Texture(
+          "assets/finish_line.gif",
+          "LINEAR_MIPMAP_LINEAR"
+        ),
+        light_depth_texture: null,
+      }),
+
+      ground: new Material(new Texture_Scroll_X(), {
+        color: hex_color("#000000"),
+        ambient: 1,
         texture: new Texture(
           "assets/desert.png",
           "LINEAR_MIPMAP_LINEAR"
@@ -91,11 +99,8 @@ class Base_Scene extends Scene {
       }),
 
       sky: new Material(new Texture_Scroll_X(), {
-        //color: hex_color("#9e6f00"),
         color: hex_color("#000000"),
         ambient: 1,
-        //diffusivity: 0.1,
-        //specularity: 0.1,
         texture: new Texture(
           "assets/sky.jpg",
           "LINEAR_MIPMAP_LINEAR"
@@ -230,12 +235,20 @@ export class Assignment2 extends Base_Scene {
     this.destination_right_model = Mat4.translation(-35, -20, -500).times(
       Mat4.scale(2, 1, 2).times(Mat4.scale(1, 20, 1))
     );
+    this.destination_flag_model = Mat4.translation(-10, -10, -500).times(
+      Mat4.scale(2, 1, 2).times(Mat4.scale(12, 5, 1))
+    );
 
     // ground
     this.ground_model = Mat4.translation(-10, -40, -50).times(
       Mat4.scale(600, 0.01, 600).times(Mat4.scale(1, 20, 1))
     );
     this.ground_y = -40.0;
+
+    // path 
+    this.path_model = Mat4.translation(-10, -39.5, -50).times(
+      Mat4.scale(30, 0.01, 600).times(Mat4.scale(1, 20, 1))
+    );
 
     // avatar
     this.avatar_center_coord = vec3(0, 0, 0);
@@ -481,6 +494,20 @@ export class Assignment2 extends Base_Scene {
       this.destination_right_model,
       draw_shadow ? this.materials.destination : this.pure
     );
+
+    this.shapes.destination_flag.arrays.texture_coord.forEach(
+        (v, i, l) => {
+            v[0] = v[0]*1;
+            v[1] = v[1]*0.25;
+        }
+    )
+    this.shapes.destination_flag.draw(
+      context,
+      program_state,
+      this.destination_flag_model,
+      draw_shadow ? this.materials.destination_flag : this.pure
+    );
+
   }
 
   draw_ground(context, program_state, draw_shadow) {
@@ -498,6 +525,16 @@ export class Assignment2 extends Base_Scene {
     );
   }
 
+  draw_path(context, program_state, draw_shadow) {
+    this.shapes.ground.draw(
+      context,
+      program_state,
+      this.path_model,
+      draw_shadow ? this.materials.plastic.override({ color: this.grey })
+       : this.pure
+    );
+  }
+
   draw_sky(context, program_state, draw_shadow) { 
     this.shapes.sky.arrays.texture_coord.forEach(
       (v, i, l) => {
@@ -508,7 +545,7 @@ export class Assignment2 extends Base_Scene {
     this.shapes.sky.draw(
       context,
       program_state,
-      Mat4.rotation(Math.PI, 0, 0, 1).times(Mat4.scale(600, 600, 600)),
+      Mat4.rotation(Math.PI, 0, 0, 1).times(Mat4.scale(550, 550, 550)),
       draw_shadow ? this.materials.sky : this.pure
     );
   }
@@ -1614,6 +1651,7 @@ export class Assignment2 extends Base_Scene {
 
     this.draw_destination(context, program_state, draw_shadow);
     this.draw_ground(context, program_state, draw_shadow);
+    this.draw_path(context, program_state, draw_shadow);
     this.draw_sky(context, program_state, draw_shadow);
     this.draw_barricades(context, program_state, draw_shadow);
     this.draw_left_stilt(context, program_state, draw_shadow);
@@ -1622,6 +1660,12 @@ export class Assignment2 extends Base_Scene {
   }
 
   display(context, program_state) {
+    // camera position
+    if (!context.scratchpad.controls) {
+        this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
+        // Define the global camera and projection matrices, which are stored in program_state.
+        program_state.set_camera(Mat4.translation(30, 0, -150).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)));
+    }
     if (this.reach_destination) {
       alert("You have reached the destination! Congratulation");
       window.location.reload();
