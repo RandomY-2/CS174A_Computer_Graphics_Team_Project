@@ -45,6 +45,8 @@ class Base_Scene extends Scene {
     // At the beginning of our program, load one of each of these shape definitions onto the GPU.
     this.shapes = {
       stilt: new defs.Cube(),
+      ground: new defs.Cube(),
+      sky: new Subdivision_Sphere(6),
       sphere: new Subdivision_Sphere(6),
       triangle: new defs.Triangle(),
     };
@@ -68,13 +70,27 @@ class Base_Scene extends Scene {
         light_depth_texture: null,
       }),
 
-      ground: new Material(new Shadow_Textured_Phong_Shader(1), {
-        color: hex_color("#9e6f00"),
-        ambient: 1.0,
-        diffusivity: 0.1,
-        specularity: 0.1,
-        color_texture: new Texture(
-          "assets/ground.jpeg",
+      ground: new Material(new Texture_Scroll_X(), {
+        //color: hex_color("#9e6f00"),
+        color: hex_color("#000000"),
+        ambient: 1,
+        //diffusivity: 0.1,
+        //specularity: 0.1,
+        texture: new Texture(
+          "assets/desert.png",
+          "LINEAR_MIPMAP_LINEAR"
+        ),
+        light_depth_texture: null,
+      }),
+
+      sky: new Material(new Texture_Scroll_X(), {
+        //color: hex_color("#9e6f00"),
+        color: hex_color("#000000"),
+        ambient: 1,
+        //diffusivity: 0.1,
+        //specularity: 0.1,
+        texture: new Texture(
+          "assets/sky.jpg",
           "LINEAR_MIPMAP_LINEAR"
         ),
         light_depth_texture: null,
@@ -134,6 +150,7 @@ export class Assignment2 extends Base_Scene {
 
     this.blue = hex_color("#1a9ffa");
     this.grey = hex_color("888888");
+    this.ground_color = 
 
     // barricades
     this.barricade_1_forward = true;
@@ -196,7 +213,7 @@ export class Assignment2 extends Base_Scene {
 
     // ground
     this.ground_model = Mat4.translation(-10, -40, -50).times(
-      Mat4.scale(30, 0.01, 600).times(Mat4.scale(1, 20, 1))
+      Mat4.scale(600, 0.01, 600).times(Mat4.scale(1, 20, 1))
     );
     this.ground_y = -40.0;
 
@@ -204,6 +221,11 @@ export class Assignment2 extends Base_Scene {
     this.avatar_center_coord = vec3(0, 0, 0);
 
     this.avatar_model = Mat4.scale(5, 0.6, 5).times(Mat4.scale(1, 20, 1));
+
+    // fall forward/backward flags (for leaning due to gravity)
+    this.fall_forward = false;
+    this.fall_backward = false;
+    this.angular_velocity = 0;
 
     // transformation model for left and right stilt
     this.left_stilt_model = Mat4.scale(1, 20, 1);
@@ -302,8 +324,8 @@ export class Assignment2 extends Base_Scene {
       }
     );
     this.key_triggered_button(
-      "Lean Backward",
-      ["k"],
+      "Lean Forward",
+      ["i"],
       () => {
         this.lean_backward = true;
         this.lean_forward = false;
@@ -314,8 +336,8 @@ export class Assignment2 extends Base_Scene {
       }
     );
     this.key_triggered_button(
-      "Lean Forward",
-      ["i"],
+      "Lean Backward",
+      ["k"],
       () => {
         this.lean_forward = true;
         this.lean_backward = false;
@@ -442,11 +464,32 @@ export class Assignment2 extends Base_Scene {
   }
 
   draw_ground(context, program_state, draw_shadow) {
-    this.shapes.stilt.draw(
+    this.shapes.ground.arrays.texture_coord.forEach(
+        (v, i, l) => {
+            v[0] = v[0]*16;
+            v[1] = v[1]*16;
+        }
+    )
+    this.shapes.ground.draw(
       context,
       program_state,
       this.ground_model,
       draw_shadow ? this.materials.ground : this.pure
+    );
+  }
+
+  draw_sky(context, program_state, draw_shadow) { 
+    this.shapes.sky.arrays.texture_coord.forEach(
+      (v, i, l) => {
+          v[0] = v[0]*8;
+          v[1] = v[1]*1;
+      }
+    )
+    this.shapes.sky.draw(
+      context,
+      program_state,
+      Mat4.rotation(Math.PI, 0, 0, 1).times(Mat4.scale(600, 600, 600)),
+      draw_shadow ? this.materials.sky : this.pure
     );
   }
 
@@ -504,6 +547,52 @@ export class Assignment2 extends Base_Scene {
 
     this.update_left_stilt_coords();
     this.update_right_stilt_coords();
+  }
+
+  check_stable() {
+    let last_fall_forward = this.fall_forward;
+    let last_fall_backward = this.fall_backward;
+    this.fall_forward = false;
+    this.fall_backward = false;
+    if (this.left_stilt_angle > 0 && this.right_stilt_angle > 0) {
+      this.fall_backward = true;
+      this.fall_forward = false;
+    }
+    else if (this.left_stilt_angle < 0 && this.right_stilt_angle < 0) {
+      this.fall_backward = false;
+      this.fall_forward = true;
+    }
+    else if (this.left_stilt_angle > 0 && this.right_stilt_lift){
+      this.fall_backward = true;
+      this.fall_forward = false;
+    }
+    else if (this.left_stilt_angle < 0 && this.right_stilt_lift){
+      this.fall_backward = false;
+      this.fall_forward = true;
+    }
+    else if (this.right_stilt_angle > 0 && this.left_stilt_lift){
+      this.fall_backward = true;
+      this.fall_forward = false;
+    }
+    else if (this.right_stilt_angle < 0 && this.left_stilt_lift){
+      this.fall_backward = false;
+      this.fall_forward = true;
+    }
+    if (last_fall_backward == this.fall_backward && last_fall_forward == this.fall_forward) {
+      this.angular_velocity += 0.0001;
+    } else {
+      this.angular_velocity = 0;
+    }
+  }
+
+  lean_due_to_gravity() {
+    this.check_stable();
+    if (this.fall_backward) {
+      this.lean(true, this.angular_velocity);
+    }
+    else if (this.fall_forward) {
+      this.lean(false, this.angular_velocity);
+    }
   }
 
   // to lift stilts, translate y up until reach maximum stilt height
@@ -1505,6 +1594,7 @@ export class Assignment2 extends Base_Scene {
 
     this.draw_destination(context, program_state, draw_shadow);
     this.draw_ground(context, program_state, draw_shadow);
+    this.draw_sky(context, program_state, draw_shadow);
     this.draw_barricades(context, program_state, draw_shadow);
     this.draw_left_stilt(context, program_state, draw_shadow);
     this.draw_right_stilt(context, program_state, draw_shadow);
@@ -1616,6 +1706,7 @@ export class Assignment2 extends Base_Scene {
     this.render_scene(context, program_state, true, true, true);
 
     this.set_up_gravity(dt);
+    this.lean_due_to_gravity();
     this.update_rotation_angles();
     this.update_stilt_flags(dt);
     this.update_avatar();
@@ -1667,4 +1758,32 @@ export class Assignment2 extends Base_Scene {
     console.log("left stilt bottom coord: ", this.left_stilt_bottom_coord);
     console.log("right stilt bottom coord: ", this.right_stilt_bottom_coord);
   }
+}
+
+
+class Texture_Scroll_X extends Textured_Phong {
+    // TODO:  Modify the shader below (right now it's just the same fragment shader as Textured_Phong) for requirement #6.
+    fragment_glsl_code() {
+        return this.shared_glsl_code() + `
+            varying vec2 f_tex_coord; // stores the vec2 of pre-interpolated texture coordinates
+            uniform sampler2D texture;
+            uniform float animation_time; 
+            
+            void main(){
+                // Sample the texture image in the correct place:
+
+                float x = mod(f_tex_coord[0]-2.0*animation_time, 2.0);
+                vec2 f_tex_coord_modified = vec2(x, f_tex_coord[1]);
+                vec4 tex_color = texture2D( texture, f_tex_coord_modified);
+                
+                //continuous scrolling
+                float scroll_factor = 2.0;               
+                
+                if( tex_color.w < .01 ) discard;
+                                                                         // Compute an initial (ambient) color:
+                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                                                                         // Compute the final color with contributions from lights:
+                gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
+        } `;
+    }
 }
