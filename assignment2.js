@@ -70,11 +70,9 @@ class Base_Scene extends Scene {
       }),
 
       destination: new Material(new Shadow_Textured_Phong_Shader(1), {
-        color: hex_color("#9e6f00"),
+        color: hex_color("#000000"),
         ambient: 1.0,
-        diffusivity: 0.1,
-        specularity: 0.1,
-        color_texture: new Texture("assets/wood.jpeg", "LINEAR_MIPMAP_LINEAR"),
+        texture: new Texture("assets/wood.jpg", "LINEAR_MIPMAP_LINEAR"),
         light_depth_texture: null,
       }),
 
