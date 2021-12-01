@@ -60,6 +60,13 @@ class Base_Scene extends Scene {
         color_texture: null,
         light_depth_texture: null,
       }),
+      
+      metal: new Material(new defs.Phong_Shader(),{
+        ambient: .2, 
+        diffusivity: .8, 
+        specularity: .8, 
+        color: color(.9, .5, .9, 1)
+      }),
 
       destination: new Material(new Shadow_Textured_Phong_Shader(1), {
         color: hex_color("#9e6f00"),
@@ -91,6 +98,19 @@ class Base_Scene extends Scene {
         //specularity: 0.1,
         texture: new Texture(
           "assets/sky.jpg",
+          "LINEAR_MIPMAP_LINEAR"
+        ),
+        light_depth_texture: null,
+      }),
+
+      barricade_body: new Material(new Texture_Scroll_X(), {
+        //color: hex_color("#9e6f00"),
+        color: hex_color("#000000"),
+        ambient: 1,
+        //diffusivity: 0.1,
+        //specularity: 0.1,
+        texture: new Texture(
+          "assets/stone.jpg",
           "LINEAR_MIPMAP_LINEAR"
         ),
         light_depth_texture: null,
@@ -149,8 +169,8 @@ export class Assignment2 extends Base_Scene {
     super();
 
     this.blue = hex_color("#1a9ffa");
-    this.grey = hex_color("888888");
-    this.ground_color = 
+    this.grey = hex_color("#888888");
+    this.bark = hex_color("#847e76");
 
     // barricades
     this.barricade_1_forward = true;
@@ -362,7 +382,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_1_rod_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.metal.override({ color: this.bark })
         : this.pure
     );
     this.shapes.stilt.draw(
@@ -370,7 +390,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_1_body_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.barricade_body
         : this.pure
     );
 
@@ -380,7 +400,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_2_rod_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.metal.override({ color: this.bark })
         : this.pure
     );
     this.shapes.stilt.draw(
@@ -388,7 +408,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_2_body_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.barricade_body
         : this.pure
     );
 
@@ -398,7 +418,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_3_rod_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.metal.override({ color: this.bark })
         : this.pure
     );
     this.shapes.stilt.draw(
@@ -406,7 +426,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_3_body_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.barricade_body
         : this.pure
     );
 
@@ -416,7 +436,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_4_rod_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.metal.override({ color: this.bark })
         : this.pure
     );
     this.shapes.stilt.draw(
@@ -424,7 +444,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_4_body_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.barricade_body
         : this.pure
     );
 
@@ -434,7 +454,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_5_rod_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.metal.override({ color: this.bark })
         : this.pure
     );
     this.shapes.stilt.draw(
@@ -442,7 +462,7 @@ export class Assignment2 extends Base_Scene {
       program_state,
       this.barricade_5_body_model,
       draw_shadow
-        ? this.materials.plastic.override({ color: this.blue })
+        ? this.materials.barricade_body
         : this.pure
     );
   }
