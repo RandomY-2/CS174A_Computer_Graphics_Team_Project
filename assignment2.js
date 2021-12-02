@@ -37,6 +37,25 @@ import {
   LIGHT_DEPTH_TEX_SIZE,
 } from "./examples/shadow-demo-shaders.js";
 
+const Square =
+    class Square extends tiny.Vertex_Buffer {
+        constructor() {
+            super("position", "normal", "texture_coord");
+            this.arrays.position = [
+                vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0),
+                vec3(1, 1, 0), vec3(1, 0, 0), vec3(0, 1, 0)
+            ];
+            this.arrays.normal = [
+                vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
+                vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
+            ];
+            this.arrays.texture_coord = [
+                vec(0, 0), vec(1, 0), vec(0, 1),
+                vec(1, 1), vec(1, 0), vec(0, 1)
+            ]
+        }
+    }
+
 class Base_Scene extends Scene {
   constructor() {
     // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
@@ -50,6 +69,7 @@ class Base_Scene extends Scene {
       sky: new Subdivision_Sphere(6),
       sphere: new Subdivision_Sphere(6),
       triangle: new defs.Triangle(),
+      square_2d: new Square(),
     };
 
     // *** Materials
@@ -63,10 +83,12 @@ class Base_Scene extends Scene {
       }),
 
       metal: new Material(new defs.Phong_Shader(),{
-        ambient: .2, 
-        diffusivity: .8, 
-        specularity: .8, 
-        color: color(.9, .5, .9, 1)
+        ambient: .2,
+        diffusivity: .8,
+        specularity: .8,
+        color: color(.9, .5, .9, 1),
+        color_texture: null,
+        light_depth_texture: null,
       }),
 
       destination: new Material(new Shadow_Textured_Phong_Shader(1), {
@@ -106,9 +128,9 @@ class Base_Scene extends Scene {
         light_depth_texture: null,
       }),
 
-      barricade_body: new Material(new Texture_Scroll_X(), {
+      barricade_body: new Material(new Shadow_Textured_Phong_Shader(1), {
         //color: hex_color("#9e6f00"),
-        color: hex_color("#000000"),
+        color: hex_color("#a39329"),
         ambient: 1,
         //diffusivity: 0.1,
         //specularity: 0.1,
@@ -243,7 +265,7 @@ export class Assignment2 extends Base_Scene {
     );
     this.ground_y = -40.0;
 
-    // path 
+    // path
     this.path_model = Mat4.translation(-10, -39.5, -50).times(
       Mat4.scale(30, 0.01, 600).times(Mat4.scale(1, 20, 1))
     );
@@ -304,6 +326,9 @@ export class Assignment2 extends Base_Scene {
     this.lean_backward = false;
     this.barricades_fast = false;
     this.freeze_barricade = false;
+    this.toggle_depth_map = false;
+    this.bind_camera = false;
+    this.easy_mode = false;
   }
 
   make_control_panel() {
@@ -378,11 +403,20 @@ export class Assignment2 extends Base_Scene {
         this.lean_forward = false;
       }
     );
-    this.key_triggered_button("Toggle On/Off 2X speed", ["l"], () => {
+    this.key_triggered_button("Toggle On/Off 2X speed", ["y"], () => {
       this.barricades_fast = !this.barricades_fast;
     });
     this.key_triggered_button("Freeze/Unfreeze Barricades", ["p"], () => {
       this.freeze_barricade = !this.freeze_barricade;
+    });
+    this.key_triggered_button("Toggle Depth Map", ["l"], () => {
+      this.toggle_depth_map = !this.toggle_depth_map;
+    });
+    this.key_triggered_button("Bind Camera", ["m"], () => {
+      this.bind_camera = !this.bind_camera;
+    });
+    this.key_triggered_button("Easy!", ["e"], () => {
+      this.easy_mode = !this.easy_mode;
     });
   }
 
@@ -533,7 +567,7 @@ export class Assignment2 extends Base_Scene {
     );
   }
 
-  draw_sky(context, program_state, draw_shadow) { 
+  draw_sky(context, program_state, draw_shadow) {
     this.shapes.sky.arrays.texture_coord.forEach(
       (v, i, l) => {
           v[0] = v[0]*8;
@@ -1662,8 +1696,9 @@ export class Assignment2 extends Base_Scene {
     if (!context.scratchpad.controls) {
         this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
         // Define the global camera and projection matrices, which are stored in program_state.
-        program_state.set_camera(Mat4.translation(30, 0, -150).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)));
+        program_state.set_camera(Mat4.translation(50, 0, -150).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)));
     }
+
     if (this.reach_destination) {
       alert("You have reached the destination! Congratulation");
       window.location.reload();
@@ -1693,35 +1728,23 @@ export class Assignment2 extends Base_Scene {
       this.init_ok = true;
     }
 
-    if (!context.scratchpad.controls) {
-      this.children.push(
-        (context.scratchpad.controls = new defs.Movement_Controls())
-      );
-      // Define the global camera and projection matrices, which are stored in program_state.
-      program_state.set_camera(
-        Mat4.look_at(vec3(0, 12, 12), vec3(0, 2, 0), vec3(0, 1, 0))
-      ); // Locate the camera here
-    }
-
     // The position of the light
-    this.light_position = vec4(2, 40, 0, 1);
+    this.light_position = vec4(-10, 20, 50, 1);
+    // this.light_position = vec4(this.avatar_center_coord[0], this.avatar_center_coord[1] + 20, this.avatar_center_coord[2] + 50, 1);
 
     // The color of the light
-    this.light_color = color(
-      0.667 + Math.sin(t / 500) / 3,
-      0.667 + Math.sin(t / 1500) / 3,
-      0.667 + Math.sin(t / 3500) / 3,
-      1
-    );
+    this.light_color = color(1, 1, 1, 1);
 
     // This is a rough target of the light.
     // Although the light is point light, we need a target to set the POV of the light
-    this.light_view_target = vec4(0, 0, 0, 1);
-    this.light_field_of_view = 180; // 130 degree
+    this.light_view_target = vec4(0, -40, -100, 1);
+    this.light_field_of_view = 130 / 180 * Math.PI; // 130 degree
 
     program_state.lights = [
-      new Light(this.light_position, this.light_color, 1000000),
+      new Light(this.light_position, this.light_color, 10000000000),
     ];
+
+    this.shapes.sphere.draw(context, program_state, Mat4.translation(0, -40, -100), this.materials.metal);
 
     // Step 1: set the perspective and camera to the POV of light
     const light_view_mat = Mat4.look_at(
@@ -1740,8 +1763,8 @@ export class Assignment2 extends Base_Scene {
     const light_proj_mat = Mat4.perspective(
       this.light_field_of_view,
       1,
-      1,
-      800
+      0.5,
+      900
     );
     // Bind the Depth Texture Buffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
@@ -1763,12 +1786,25 @@ export class Assignment2 extends Base_Scene {
       Math.PI / 4,
       context.width / context.height,
       0.5,
-      800
+      900
     );
     this.render_scene(context, program_state, true, true, true);
 
+    if (this.toggle_depth_map) {
+      this.shapes.square_2d.draw(context, program_state,
+        Mat4.translation(-.99, .08, 0).times(
+        Mat4.scale(0.5, 0.5 * gl.canvas.width / gl.canvas.height, 1)
+        ),
+        this.depth_tex.override({texture: this.lightDepthTexture})
+      );
+    }
+
     this.set_up_gravity(dt);
-    this.lean_due_to_gravity();
+
+    if (!this.easy_mode) {
+      this.lean_due_to_gravity();
+    }
+
     this.update_rotation_angles();
     this.update_stilt_flags(dt);
     this.update_avatar();
@@ -1829,21 +1865,21 @@ class Texture_Scroll_X extends Textured_Phong {
         return this.shared_glsl_code() + `
             varying vec2 f_tex_coord; // stores the vec2 of pre-interpolated texture coordinates
             uniform sampler2D texture;
-            uniform float animation_time; 
-            
+            uniform float animation_time;
+
             void main(){
                 // Sample the texture image in the correct place:
 
                 float x = mod(f_tex_coord[0]-2.0*animation_time, 2.0);
                 vec2 f_tex_coord_modified = vec2(x, f_tex_coord[1]);
                 vec4 tex_color = texture2D( texture, f_tex_coord_modified);
-                
+
                 //continuous scrolling
-                float scroll_factor = 2.0;               
-                
+                float scroll_factor = 2.0;
+
                 if( tex_color.w < .01 ) discard;
                                                                          // Compute an initial (ambient) color:
-                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w );
                                                                          // Compute the final color with contributions from lights:
                 gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );
         } `;
